@@ -1,6 +1,2 @@
-# DungeonRunner
-A rogue-like dungeon game
-
-### Resources:
-  * http://www.roguebasin.com/index.php?title=Rot.js_tutorial
-  
+# DungeonGenerator
+A 2D text file dungeon generator
