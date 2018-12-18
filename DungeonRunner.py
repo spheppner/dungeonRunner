@@ -417,7 +417,23 @@ class Dreieck(VectorSprite):
         self.image0 = self.image.copy()
         self.rect = self.image.get_rect()
         
-
+class Player(VectorSprite):
+   
+    def _overwrite_parameters(self):
+        self._layer = 5
+    
+    
+    def create_image(self):
+        self.fontsize = 32
+        self.color = (255, 0, 255)
+        self.text = "@"
+        self.image = make_text(self.text, self.color, self.fontsize)
+        print(self.image)
+        #write(self.image
+        self.image.set_colorkey((0, 0, 0))
+        self.image.convert_alpha()
+        self.image0 = self.image.copy()
+        self.rect = self.image.get_rect()
     
 class Wall(VectorSprite):
 
@@ -626,7 +642,7 @@ class PygView(object):
         self.loadlevel()
     
     def loadlevel(self):
-        with open("../DungeonGenerator/dungeon.txt", "r") as f:
+        with open("DungeonGenerator/dungeon.txt", "r") as f:
             self.lines = f.readlines()
         print(self.lines)
         print(len(self.lines))
@@ -637,6 +653,9 @@ class PygView(object):
                     p = pygame.math.Vector2(x * 20+10, -y*20-10) 
                     #print(p.x, p.y)
                     Wall(pos=p)
+                elif char == "@":
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
+                    self.player3.pos = p 
     
     
     
@@ -662,14 +681,19 @@ class PygView(object):
         self.mousegroup = pygame.sprite.Group()
         self.explosiongroup = pygame.sprite.Group()
         self.tilegroup = pygame.sprite.Group()
-        Mouse.groups = self.allgroup, self.mousegroup
+        self.playergroup = pygame.sprite.Group()
         
+        Mouse.groups = self.allgroup, self.mousegroup
         VectorSprite.groups = self.allgroup
         Flytext.groups = self.allgroup
         Explosion.groups= self.allgroup, self.explosiongroup
         Wall.groups = self.allgroup, self.tilegroup
-        
-
+        Bush.groups = self.allgroup, self.tilegroup
+        DoorOfTeleportation.groups = self.allgroup, self.tilegroup
+        Floor.groups = self.allgroup, self.tilegroup
+        StairDown.groups = self.allgroup, self.tilegroup
+        StairUp.groups = self.allgroup, self.tilegroup 
+        Player.groups = self.allgroup, self.playergroup
    
         # ------ player1,2,3: mouse, keyboard, joystick ---
         self.mouse1 = Mouse(control="mouse", color=(255,0,0))
@@ -678,9 +702,9 @@ class PygView(object):
         self.mouse4 = Mouse(control="joystick1", color=(255,128,255))
         self.mouse5 = Mouse(control="joystick2", color=(255,255,255))
 
-        self.eck =  Dreieck(warp_on_edge=True, pos=pygame.math.Vector2(PygView.width/2,-PygView.height/2))
-
-   
+        self.eck = Dreieck(warp_on_edge=True, pos=pygame.math.Vector2(PygView.width/2,-PygView.height/2))
+        self.player3 = Player(pos = pygame.math.Vector2(100,-100))
+        #Flytext(PygView.width/2, PygView.height/2,  "@", color=(255,0,0), duration = 3, fontsize=20)
    
     def run(self):
         """The mainloop"""
@@ -700,6 +724,7 @@ class PygView(object):
             #Game over?
             #if not gameOver:
             # -------- events ------
+            self.player3.move = pygame.math.Vector2(0,0) # rumstehen
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -741,14 +766,16 @@ class PygView(object):
                         #self.eck.rotate(m)
                     #    Flytext(PygView.width/2, PygView.height/2,  "angle = {}".format(angle), color=(255,0,0), duration = 3, fontsize=20)
                     # ---- -simple movement for self.eck -------
+                    
                     if event.key == pygame.K_RIGHT:
-                        self.eck.move += pygame.math.Vector2(10,0)
+                        #self.player3.move = pygame.math.Vector2(20,0)
+                        self.player3.pos += pygame.math.Vector2(20,0)
                     if event.key == pygame.K_LEFT:
-                        self.eck.move += pygame.math.Vector2(-10,0)
+                        self.player3.pos += pygame.math.Vector2(-20,0)
                     if event.key == pygame.K_UP:
-                        self.eck.move += pygame.math.Vector2(0,10)
+                        self.player3.pos += pygame.math.Vector2(0,20)
                     if event.key == pygame.K_DOWN:
-                        self.eck.move += pygame.math.Vector2(0,-10)
+                        self.player3.pos += pygame.math.Vector2(0,-20)
                     # ---- stop movement for self.eck -----
                     if event.key == pygame.K_r:
                         self.eck.move *= 0.1 # remove 90% of movement
