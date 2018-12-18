@@ -13,7 +13,7 @@ legend = {".": {"name": "floor",
                 "max": 30,
                 "character": "#"},              
           "d": {"name": "door of teleportation",
-                "prob": None,
+                "prob": 0.001,
                 "max": 2,
                 "character": "d"},
           "<": {"name": "stair down",
@@ -23,8 +23,12 @@ legend = {".": {"name": "floor",
           ">": {"name": "stair up",
                 "prob": 0.02,
                 "max": None,
-                "character": ">"}
-         } 
+                "character": ">"},
+          "@": {"name": "Player",
+                "prob": None,
+                "max": 1,
+                "character": "@"}
+          }
          
 rooms = []
 d = []
@@ -56,6 +60,7 @@ rock_character = legend["#"]["character"]
 door_character = legend["d"]["character"]
 stairdown_character = legend["<"]["character"]
 stairup_character = legend[">"]["character"]
+player_character = legend["@"]["character"]
 
 for y, line in enumerate(range(maxlines)):
     l = []
@@ -177,6 +182,14 @@ for n in range(2, random.randint(1, max_pebbles//4)):
         d[y][x] = "<"
     elif random.random() < stairup_prob:
         d[y][x] = ">"
+        
+# player generiert
+
+random.shuffle(pebbles)
+n = 0
+x = pebbles[n][0]
+y = pebbles[n][1]
+d[y][x] = "@"
 
 
 # ---- dungeon printer ----
