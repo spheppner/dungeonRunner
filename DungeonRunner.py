@@ -681,13 +681,14 @@ class PygView(object):
         self.mousegroup = pygame.sprite.Group()
         self.explosiongroup = pygame.sprite.Group()
         self.tilegroup = pygame.sprite.Group()
+        self.nogogroup = pygame.sprite.Group()
         self.playergroup = pygame.sprite.Group()
         
         Mouse.groups = self.allgroup, self.mousegroup
         VectorSprite.groups = self.allgroup
         Flytext.groups = self.allgroup
         Explosion.groups= self.allgroup, self.explosiongroup
-        Wall.groups = self.allgroup, self.tilegroup
+        Wall.groups = self.allgroup, self.tilegroup, self.nogogroup
         Bush.groups = self.allgroup, self.tilegroup
         DoorOfTeleportation.groups = self.allgroup, self.tilegroup
         Floor.groups = self.allgroup, self.tilegroup
@@ -768,14 +769,45 @@ class PygView(object):
                     # ---- -simple movement for self.eck -------
                     
                     if event.key == pygame.K_RIGHT:
-                        #self.player3.move = pygame.math.Vector2(20,0)
-                        self.player3.pos += pygame.math.Vector2(20,0)
+                        x = self.player3.pos.x + 20
+                        y = self.player3.pos.y + 0
+                        # is da was?
+                        for w in self.nogogroup:
+                            if w.pos.x == x and w.pos.y == y:
+                                Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 3, fontsize = 16)
+                                break
+                        else:
+                            self.player3.pos += pygame.math.Vector2(20,0)
                     if event.key == pygame.K_LEFT:
-                        self.player3.pos += pygame.math.Vector2(-20,0)
+                        x = self.player3.pos.x - 20
+                        y = self.player3.pos.y + 0
+                        # is da was?
+                        for w in self.nogogroup:
+                            if w.pos.x == x and w.pos.y == y:
+                                Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 3, fontsize = 16)
+                                break
+                        else:
+                            self.player3.pos += pygame.math.Vector2(-20,0)
                     if event.key == pygame.K_UP:
-                        self.player3.pos += pygame.math.Vector2(0,20)
+                        x = self.player3.pos.x + 0
+                        y = self.player3.pos.y + 20
+                        # is da was?
+                        for w in self.nogogroup:
+                            if w.pos.x == x and w.pos.y == y:
+                                Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 3, fontsize = 16)
+                                break
+                        else:
+                            self.player3.pos += pygame.math.Vector2(0,20)
                     if event.key == pygame.K_DOWN:
-                        self.player3.pos += pygame.math.Vector2(0,-20)
+                        x = self.player3.pos.x + 0
+                        y = self.player3.pos.y - 20
+                        # is da was?
+                        for w in self.nogogroup:
+                            if w.pos.x == x and w.pos.y == y:
+                                Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 3, fontsize = 16)
+                                break
+                        else:
+                            self.player3.pos += pygame.math.Vector2(0,-20)
                     # ---- stop movement for self.eck -----
                     if event.key == pygame.K_r:
                         self.eck.move *= 0.1 # remove 90% of movement
@@ -844,7 +876,7 @@ class PygView(object):
             pos1 = pygame.math.Vector2(pygame.mouse.get_pos())
             pos2 = self.mouse2.rect.center
             pos3 = self.mouse3.rect.center
-            
+        
             # write text below sprites
             write(self.screen, "FPS: {:8.3}".format(
                 self.clock.get_fps() ), x=10, y=10)
