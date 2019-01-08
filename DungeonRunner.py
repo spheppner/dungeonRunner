@@ -20,6 +20,13 @@ import math
 
 """Best game: 10 waves by Ines"""
 
+def randomize_color(color, delta=50):
+    d=random.randint(-delta, delta)
+    color = color + d
+    color = min(255,color)
+    color = max(0, color)
+    return color
+
 def make_text(msg="pygame is cool", fontcolor=(255, 0, 255), fontsize=42, font=None):
     """returns pygame surface with text. You still need to blit the surface."""
     myfont = pygame.font.SysFont(font, fontsize)
@@ -515,39 +522,48 @@ class Smoke(VectorSprite):
         self.color=(c,c,c)
 
 
-class Explosion(VectorSprite):
+class Explosion():
+    
+    def __init__(self, pos, maxspeed=150, minspeed=20, color=(255,255,0),maxduration=2.5,gravityy=3.7,sparksmin=5,sparksmax=20, a1=0,a2=360):
 
+        for s in range(random.randint(sparksmin,sparksmax)):
+            v = pygame.math.Vector2(1,0) # vector aiming right (0°)
+            a = random.triangular(a1,a2)
+            v.rotate_ip(a)
+            g = pygame.math.Vector2(0, - gravityy)
+            speed = random.randint(minspeed, maxspeed)     #150
+            duration = random.random() * maxduration     
+            Spark(pos=pygame.math.Vector2(pos.x, pos.y), angle=a, move=v*speed,
+                  max_age = duration, color=color, gravity = g)
+         
+class Spark(VectorSprite):
+
+    def __init__(self, **kwargs):
+        VectorSprite.__init__(self, **kwargs)
+        if "gravity" not in kwargs:
+            self.gravity = pygame.math.Vector2(0, -3.7)
+    
     def _overwrite_parameters(self):
-        self._layer = 2
-
+        self._layer = 8
+        self.kill_on_edge = True
+    
     def create_image(self):
-        self.image=pygame.Surface((self.radius*2, self.radius*2))
-        pygame.draw.circle(self.image, (197, 37,  37),(self.radius, self.radius),  self.radius, 0)
-        r, g, b = self.color
-        for rad in range(5,66, 5):
-            if self.radius > rad:
-                if r != 0 and r != 255:
-                   r1 = (random.randint(rad-10,rad) + r) % 255
-                else:
-                    r1 = r
-                if g != 0 and g != 255:
-                    g1 = (random.randint(rad-10,rad) + g) % 255
-                else:
-                    g1 = g
-                if b != 0 and b != 255:
-                    b1 = (random.randint(rad-10,rad) + b) % 255
-                else:
-                    b1 = b
-                pygame.draw.circle(self.image, (r1,g1,b1), (self.radius, self.radius), self.radius-rad, 0)
+        r,g,b = self.color
+        r = randomize_color(r,75)    #50
+        g = randomize_color(g,75)
+        b = randomize_color(b,75)
+        self.image = pygame.Surface((10,10))
+        pygame.draw.line(self.image, (r,g,b), 
+                         (10,5), (5,5), 3)
+        pygame.draw.line(self.image, (r,g,b),
+                          (5,5), (2,5), 1)
         self.image.set_colorkey((0,0,0))
-        self.rect= self.image.get_rect()
+        self.rect = self.image.get_rect()
+        self.image0 = self.image.copy()
 
-    def update(self,seconds):
-         VectorSprite.update(self, seconds)
-         self.create_image()
-         self.rect=self.image.get_rect()
-         self.rect.center=(self.pos.x, self.pos.y)
-         self.radius+=1
+    def update(self, seconds):
+        VectorSprite.update(self, seconds)
+        self.move += self.gravity
 
 class Rocket(VectorSprite):
 
@@ -695,6 +711,7 @@ class PygView(object):
         StairDown.groups = self.allgroup, self.tilegroup
         StairUp.groups = self.allgroup, self.tilegroup 
         Player.groups = self.allgroup, self.playergroup
+        Spark.groups = self.allgroup
    
         # ------ player1,2,3: mouse, keyboard, joystick ---
         self.mouse1 = Mouse(control="mouse", color=(255,0,0))
@@ -774,7 +791,11 @@ class PygView(object):
                         # is da was?
                         for w in self.nogogroup:
                             if w.pos.x == x and w.pos.y == y:
-                                Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 3, fontsize = 16)
+                                #Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 0.5, fontsize = 16)
+                                ex = w.pos.x-10
+                                ey = w.pos.y
+                                ep = pygame.math.Vector2(ex,ey)
+                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = 100, a2 = 260)
                                 break
                         else:
                             self.player3.pos += pygame.math.Vector2(20,0)
@@ -784,7 +805,11 @@ class PygView(object):
                         # is da was?
                         for w in self.nogogroup:
                             if w.pos.x == x and w.pos.y == y:
-                                Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 3, fontsize = 16)
+                                #Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 0.5, fontsize = 16)
+                                ex = w.pos.x+10
+                                ey = w.pos.y
+                                ep = pygame.math.Vector2(ex,ey)
+                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = 80, a2 = -80)
                                 break
                         else:
                             self.player3.pos += pygame.math.Vector2(-20,0)
@@ -794,7 +819,11 @@ class PygView(object):
                         # is da was?
                         for w in self.nogogroup:
                             if w.pos.x == x and w.pos.y == y:
-                                Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 3, fontsize = 16)
+                                #Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 0.5, fontsize = 16)
+                                ex = w.pos.x
+                                ey = w.pos.y-10
+                                ep = pygame.math.Vector2(ex,ey)
+                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = -10, a2 = -170)
                                 break
                         else:
                             self.player3.pos += pygame.math.Vector2(0,20)
@@ -804,7 +833,11 @@ class PygView(object):
                         # is da was?
                         for w in self.nogogroup:
                             if w.pos.x == x and w.pos.y == y:
-                                Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 3, fontsize = 16)
+                                #Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 0.5, fontsize = 16)
+                                ex = w.pos.x
+                                ey = w.pos.y+10
+                                ep = pygame.math.Vector2(ex,ey)
+                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = 10, a2 = 170)
                                 break
                         else:
                             self.player3.pos += pygame.math.Vector2(0,-20)
