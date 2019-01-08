@@ -428,6 +428,8 @@ class Player(VectorSprite):
    
     def _overwrite_parameters(self):
         self._layer = 5
+        self.hitpoints = 50
+        self.endurance = 100
     
     
     def create_image(self):
@@ -848,6 +850,10 @@ class PygView(object):
    
             # delete everything on screen
             self.screen.blit(self.background, (0, 0))
+            pygame.draw.rect(self.screen, (255, 0, 255), (PygView.width-230, 0, 230, PygView.height))
+            write(self.screen, "HP: {}".format(self.player3.hitpoints), 1315, 100, (0, 255, 0), 20, True)
+            write(self.screen, "Endurance: {}".format(self.player3.endurance), 1315, 127, (0, 255, 0), 20, True)
+            
             
             # ------ move indicator for self.eck -----
             pygame.draw.circle(self.screen, (0,255,0), (100,100), 100,1)
