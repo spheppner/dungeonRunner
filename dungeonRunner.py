@@ -448,7 +448,7 @@ class Player(VectorSprite):
 class Wall(VectorSprite):
 
     def _overwrite_parameters(self):
-        self._layer = -5
+        self._layer = 5
 
     def create_image(self):
         self.image = pygame.Surface((20, 20))
@@ -467,11 +467,14 @@ class Floor(VectorSprite):
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
 
-class DoorOfTeleportation(VectorSprite):
+class Srock(VectorSprite):
+    def _overwrite_parameters(self):
+        self._layer = 5
+
     def create_image(self):
-        self.image = pygame.Surface((64,64))
-        self.image.fill((23, 32, 55))
-        pygame.draw.rect(self.image, (255,0,255), (0,0, 63,63),1)
+        self.image = pygame.Surface((20, 20))
+        self.image.fill((11, 139, 11))
+        pygame.draw.rect(self.image, (255,0,255), (0,0, 19,19),1)
         self.image.set_colorkey((0,0,0))
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
@@ -487,7 +490,7 @@ class Bush(VectorSprite):
         
 class StairDown(VectorSprite):
     def _overwrite_parameters(self):
-        self._layer = 5
+        self._layer = -5
     
     def create_image(self):
         self.fontsize = 32
@@ -499,15 +502,6 @@ class StairDown(VectorSprite):
         self.image.set_colorkey((0, 0, 0))
         self.image.convert_alpha()
         self.image0 = self.image.copy()
-        self.rect = self.image.get_rect()
-        
-class StairUp(VectorSprite):
-    def create_image(self):
-        self.image = pygame.Surface((64,64))
-        self.image.fill((21, 24, 52))
-        pygame.draw.rect(self.image, (255,0,255), (0,0, 63,63),1)
-        self.image.set_colorkey((0,0,0))
-        self.image.convert_alpha()
         self.rect = self.image.get_rect()
         
 class Smoke(VectorSprite):
@@ -684,7 +678,11 @@ class PygView(object):
                     self.player3.pos = p 
                 elif char == "<":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
-                    StairDown(pos=p) 
+                    StairDown(pos=p)
+                elif char == "s":
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10) 
+                    #print(p.x, p.y)
+                    Srock(pos=p)
     
     
     
@@ -720,10 +718,9 @@ class PygView(object):
         Explosion.groups= self.allgroup, self.explosiongroup
         Wall.groups = self.allgroup, self.tilegroup, self.nogogroup
         Bush.groups = self.allgroup, self.tilegroup
-        DoorOfTeleportation.groups = self.allgroup, self.tilegroup
+        Srock.groups = self.allgroup, self.tilegroup, self.nogogroup
         Floor.groups = self.allgroup, self.tilegroup
         StairDown.groups = self.allgroup, self.tilegroup, self.stairgroup
-        StairUp.groups = self.allgroup, self.tilegroup 
         Player.groups = self.allgroup, self.playergroup
         Spark.groups = self.allgroup
         
