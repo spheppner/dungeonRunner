@@ -9,6 +9,7 @@ idea: clean python3/pygame template using pygame.math.vector2
 """
 import pygame
 #import math
+import dungeonGenerator
 import random
 import os
 import time
@@ -485,12 +486,19 @@ class Bush(VectorSprite):
         self.rect = self.image.get_rect()
         
 class StairDown(VectorSprite):
+    def _overwrite_parameters(self):
+        self._layer = 5
+    
     def create_image(self):
-        self.image = pygame.Surface((64,64))
-        self.image.fill((43, 67, 245))
-        pygame.draw.rect(self.image, (255,0,255), (0,0, 63,63),1)
-        self.image.set_colorkey((0,0,0))
+        self.fontsize = 32
+        self.color = (255, 165, 0)
+        self.text = "<"
+        self.image = make_text(self.text, self.color, self.fontsize)
+        print(self.image)
+        #write(self.image
+        self.image.set_colorkey((0, 0, 0))
         self.image.convert_alpha()
+        self.image0 = self.image.copy()
         self.rect = self.image.get_rect()
         
 class StairUp(VectorSprite):
@@ -660,7 +668,7 @@ class PygView(object):
         self.loadlevel()
     
     def loadlevel(self):
-        with open("DungeonGenerator/dungeon.txt", "r") as f:
+        with open("dungeon.txt", "r") as f:
             self.lines = f.readlines()
         print(self.lines)
         print(len(self.lines))
@@ -674,6 +682,9 @@ class PygView(object):
                 elif char == "@":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     self.player3.pos = p 
+                elif char == "<":
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
+                    StairDown(pos=p) 
     
     
     
@@ -701,6 +712,7 @@ class PygView(object):
         self.tilegroup = pygame.sprite.Group()
         self.nogogroup = pygame.sprite.Group()
         self.playergroup = pygame.sprite.Group()
+        self.stairgroup = pygame.sprite.Group()
         
         Mouse.groups = self.allgroup, self.mousegroup
         VectorSprite.groups = self.allgroup
@@ -710,10 +722,11 @@ class PygView(object):
         Bush.groups = self.allgroup, self.tilegroup
         DoorOfTeleportation.groups = self.allgroup, self.tilegroup
         Floor.groups = self.allgroup, self.tilegroup
-        StairDown.groups = self.allgroup, self.tilegroup
+        StairDown.groups = self.allgroup, self.tilegroup, self.stairgroup
         StairUp.groups = self.allgroup, self.tilegroup 
         Player.groups = self.allgroup, self.playergroup
         Spark.groups = self.allgroup
+        
    
         # ------ player1,2,3: mouse, keyboard, joystick ---
         self.mouse1 = Mouse(control="mouse", color=(255,0,0))
@@ -843,6 +856,15 @@ class PygView(object):
                                 break
                         else:
                             self.player3.pos += pygame.math.Vector2(0,-20)
+                    
+                    if event.key == pygame.K_LESS:
+                        for s in self.stairgroup:
+                            if s.pos.x == self.player3.pos.x and s.pos.y == self.player3.pos.y:
+                                #PygView.numbers = {}
+                                for tile in self.tilegroup:
+                                    tile.kill()
+                                dungeonGenerator.start()
+                                self.loadlevel()
                     # ---- stop movement for self.eck -----
                     if event.key == pygame.K_r:
                         self.eck.move *= 0.1 # remove 90% of movement
