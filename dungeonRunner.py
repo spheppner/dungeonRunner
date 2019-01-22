@@ -811,8 +811,8 @@ class PygView(object):
             pygame.draw.rect(self.screen, (133, 11, 133), (PygView.width-215, 20, 200, 30), 10)
             # unteres endurance rect
             pygame.draw.rect(self.screen, (133, 11, 133), (PygView.width-215, 75, 200, 30), 10)
-            write(self.screen, "HP: {}".format(self.player.phitpoints), 1315, 200, (255, 0, 0), 20, True)
-            write(self.screen, "Endurance: {}".format(self.player.endurance), 1315, 225, (255, 0, 0), 20, True)
+            write(self.screen, "HP: {}/{}".format(self.player.phitpoints, self.player.max_phitpoints), 1315, 200, (255, 0, 0), 20, True)
+            write(self.screen, "Endurance: {}/{}".format(self.player.endurance, self.player.max_endurance), 1315, 225, (255, 0, 0), 20, True)
             write(self.screen, "Coins: {}".format(self.player.coins), 1315, 250, (255, 0, 0), 20, True)
             # hp = self.player.phitpoints
             # hpfull = self.player.max_phitpoints
