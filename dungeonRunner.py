@@ -3,7 +3,7 @@ author: Horst JENS
 email: horstjens@gmail.com
 contact: see http://spielend-programmieren.at/de:kontakt
 license: gpl, see http://www.gnu.org/licenses/gpl-3.0.de.html
-download: 
+download:
 idea: clean python3/pygame template using pygame.math.vector2
 
 """
@@ -54,7 +54,7 @@ def elastic_collision(sprite1, sprite2):
            The sprites need the property .mass, .radius, pos.x pos.y, move.x, move.y
            by Leonard Michlmayr"""
         if sprite1.static and sprite2.static:
-            return 
+            return
         dirx = sprite1.pos.x - sprite2.pos.x
         diry = sprite1.pos.y - sprite2.pos.y
         sumofmasses = sprite1.mass + sprite2.mass
@@ -112,120 +112,82 @@ class Flytext(pygame.sprite.Sprite):
             if self.time > self.duration:
                 self.kill()      # remove Sprite from screen and from groups
 
-class Mouse(pygame.sprite.Sprite):
-    def __init__(self, radius = 50, color=(255,0,0), x=320, y=240,
-                    startx=100,starty=100, control="mouse", ):
-        """create a (black) surface and paint a blue Mouse on it"""
-        self._layer=10
-        pygame.sprite.Sprite.__init__(self,self.groups)
-        self.radius = radius
-        self.color = color
-        self.startx=startx
-        self.starty=starty
-        self.x = x
-        self.y = y
-        self.dx = 0
-        self.dy = 0
-        self.r = color[0]
-        self.g = color[1]
-        self.b = color[2]
-        self.delta = -10
-        self.age = 0
-        self.pos = pygame.mouse.get_pos()
-        self.move = 0
-        self.tail=[]
-        self.create_image()
-        self.rect = self.image.get_rect()
-        self.control = control # "mouse" "keyboard1" "keyboard2"
-        self.pushed = False
-
-    def create_image(self):
-
-        self.image = pygame.surface.Surface((self.radius*0.5, self.radius*0.5))
-        delta1 = 12.5
-        delta2 = 25
-        w = self.radius*0.5 / 100.0
-        h = self.radius*0.5 / 100.0
-        # pointing down / up
-        for y in (0,2,4):
-            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-                         (35*w,0+y),(50*w,15*h+y),2)
-            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-                         (50*w,15*h+y),(65*w,0+y),2)
-    
-            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-                         (35*w,100*h-y),(50*w,85*h-y),2)
-            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-                         (50*w,85*h-y),(65*w,100*h-y),2)
-        # pointing right / left                 
-        for x in (0,2,4):
-            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-                         (0+x,35*h),(15*w+x,50*h),2)
-            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-                         (15*w+x,50*h),(0+x,65*h),2)
-            
-            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-                         (100*w-x,35*h),(85*w-x,50*h),2)
-            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-                         (85*w-x,50*h),(100*w-x,65*h),2)
-        self.image.set_colorkey((0,0,0))
-        self.rect=self.image.get_rect()
-        self.rect.center = self.x, self.y
-
-    def update(self, seconds):
-        if self.control == "mouse":
-            self.x, self.y = pygame.mouse.get_pos()
-        elif self.control == "keyboard1":
-            pressed = pygame.key.get_pressed()
-            if pressed[pygame.K_LSHIFT]:
-                delta = 2
-            else:
-                delta = 9
-            if pressed[pygame.K_w]:
-                self.y -= delta
-            if pressed[pygame.K_s]:
-                self.y += delta
-            if pressed[pygame.K_a]:
-                self.x -= delta
-            if pressed[pygame.K_d]:
-                self.x += delta
-        elif self.control == "keyboard2":
-            pressed = pygame.key.get_pressed()
-            if pressed[pygame.K_RSHIFT]:
-                delta = 2
-            else:
-                delta = 9
-            if pressed[pygame.K_UP]:
-                self.y -= delta
-            if pressed[pygame.K_DOWN]:
-                self.y += delta
-            if pressed[pygame.K_LEFT]:
-                self.x -= delta
-            if pressed[pygame.K_RIGHT]:
-                self.x += delta
-        elif self.control == "joystick1":
-            pass
-        elif self.control == "joystick2":
-            pass
-        if self.x < 0:
-            self.x = 0
-        elif self.x > PygView.width:
-            self.x = PygView.width
-        if self.y < 0:
-            self.y = 0
-        elif self.y > PygView.height:
-            self.y = PygView.height
-        self.tail.insert(0,(self.x,self.y))
-        self.tail = self.tail[:128]
-        self.rect.center = self.x, self.y
-        self.r += self.delta   # self.r can take the values from 255 to 101
-        if self.r < 151:
-            self.r = 151
-            self.delta = 10
-        if self.r > 255:
-            self.r = 255
-            self.delta = -10
-        self.create_image()
+#class Mouse(pygame.sprite.Sprite):
+#    def __init__(self, radius = 50, color=(255,0,0), x=320, y=240,
+#                    startx=100,starty=100, control="mouse", ):
+#        """create a (black) surface and paint a blue Mouse on it"""
+#        self._layer=10
+#        pygame.sprite.Sprite.__init__(self,self.groups)
+#        self.radius = radius
+#        self.color = color
+#        self.startx=startx
+#        self.starty=starty
+#        self.x = x
+#        self.y = y
+#        self.dx = 0
+#        self.dy = 0
+#        self.r = color[0]
+#        self.g = color[1]
+#        self.b = color[2]
+#        self.delta = -10
+#        self.age = 0
+#        self.pos = pygame.mouse.get_pos()
+#        self.move = 0
+#        self.tail=[]
+#        self.create_image()
+#        self.rect = self.image.get_rect()
+#        self.control = control # "mouse" "keyboard1" "keyboard2"
+#        self.pushed = False
+#
+#    def create_image(self):
+#
+#        self.image = pygame.surface.Surface((self.radius*0.5, self.radius*0.5))
+#        delta1 = 12.5
+#        delta2 = 25
+#        w = self.radius*0.5 / 100.0
+#        h = self.radius*0.5 / 100.0
+#        # pointing down / up
+#        for y in (0,2,4):
+#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
+#                         (35*w,0+y),(50*w,15*h+y),2)
+#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
+#                         (50*w,15*h+y),(65*w,0+y),2)##
+#
+#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
+#                         (35*w,100*h-y),(50*w,85*h-y),2)
+#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
+#                         (50*w,85*h-y),(65*w,100*h-y),2)
+#        # pointing right / left
+#        for x in (0,2,4):
+#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
+#                         (0+x,35*h),(15*w+x,50*h),2)
+#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
+#                         (15*w+x,50*h),(0+x,65*h),2)##
+#
+#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
+#                         (100*w-x,35*h),(85*w-x,50*h),2)
+#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
+#                         (85*w-x,50*h),(100*w-x,65*h),2)
+#        self.image.set_colorkey((0,0,0))
+#        self.rect=self.image.get_rect()
+#        self.rect.center = self.x, self.y##
+#
+#    def update(self, seconds):
+#        if self.control == "keyboard2":
+#            pressed = pygame.key.get_pressed()
+#            if pressed[pygame.K_RSHIFT]:
+#                delta = 2
+#            else:
+#                delta = 9
+#            if pressed[pygame.K_UP]:
+#                self.y -= delta
+#            if pressed[pygame.K_DOWN]:
+#                self.y += delta
+#            if pressed[pygame.K_LEFT]:
+#                self.x -= delta
+#            if pressed[pygame.K_RIGHT]:
+#                self.x += delta
+#        self.create_image()##
 
 class VectorSprite(pygame.sprite.Sprite):
     """base class for sprites. this class inherits from pygames sprite class"""
@@ -246,10 +208,10 @@ class VectorSprite(pygame.sprite.Sprite):
             self.set_angle(self.angle)
 
     def _overwrite_parameters(self):
-        """change parameters before create_image is called""" 
+        """change parameters before create_image is called"""
         pass
 
-    def _default_parameters(self, **kwargs):    
+    def _default_parameters(self, **kwargs):
         """get unlimited named arguments and turn them into attributes
            default values for missing keywords"""
 
@@ -372,61 +334,10 @@ class VectorSprite(pygame.sprite.Sprite):
         self.pos += self.move * seconds
         self.distance_traveled += self.move.length() * seconds
         self.age += seconds
-        self.wallbounce()
         self.rect.center = ( round(self.pos.x, 0), -round(self.pos.y, 0) )
 
-    def wallbounce(self):
-        # ---- bounce / kill on screen edge ----
-        # ------- left edge ----
-        if self.pos.x < 0:
-            if self.kill_on_edge:
-                self.kill()
-            elif self.bounce_on_edge:
-                self.pos.x = 0
-                self.move.x *= -1
-            elif self.warp_on_edge:
-                self.pos.x = PygView.width 
-        # -------- upper edge -----
-        if self.pos.y  > 0:
-            if self.kill_on_edge:
-                self.kill()
-            elif self.bounce_on_edge:
-                self.pos.y = 0
-                self.move.y *= -1
-            elif self.warp_on_edge:
-                self.pos.y = -PygView.height
-        # -------- right edge -----                
-        if self.pos.x  > PygView.width:
-            if self.kill_on_edge:
-                self.kill()
-            elif self.bounce_on_edge:
-                self.pos.x = PygView.width
-                self.move.x *= -1
-            elif self.warp_on_edge:
-                self.pos.x = 0
-        # --------- lower edge ------------
-        if self.pos.y   < -PygView.height:
-            if self.kill_on_edge:
-                self.hitpoints = 0
-                self.kill()
-            elif self.bounce_on_edge:
-                self.pos.y = -PygView.height
-                self.move.y *= -1
-            elif self.warp_on_edge:
-                self.pos.y = 0
-
-class Dreieck(VectorSprite):
-    
-    def create_image(self):
-        self.image = pygame.Surface((50,50))
-        pygame.draw.polygon(self.image, (0,0,255), ((0,0),(50,25),(0,50),(25,25)))
-        self.image.set_colorkey((0,0,0))
-        self.image.convert_alpha()
-        self.image0 = self.image.copy()
-        self.rect = self.image.get_rect()
-        
 class Player(VectorSprite):
-   
+
     def _overwrite_parameters(self):
         self._layer = 5
         self.phitpoints = 50
@@ -434,19 +345,17 @@ class Player(VectorSprite):
         self.endurance = 100
         self.max_endurance = 100
         self.coins = 0
-        
+
     def create_image(self):
         self.fontsize = 32
         self.color = (255, 0, 255)
         self.text = "@"
         self.image = make_text(self.text, self.color, self.fontsize)
-        print(self.image)
-        #write(self.image
         self.image.set_colorkey((0, 0, 0))
         self.image.convert_alpha()
         self.image0 = self.image.copy()
         self.rect = self.image.get_rect()
-    
+
 class Wall(VectorSprite):
 
     def _overwrite_parameters(self):
@@ -456,15 +365,6 @@ class Wall(VectorSprite):
         self.image = pygame.Surface((20, 20))
         self.image.fill((0, 255, 0))
         pygame.draw.rect(self.image, (255,0,255), (0,0, 19,19),1)
-        self.image.set_colorkey((0,0,0))
-        self.image.convert_alpha()
-        self.rect = self.image.get_rect()
-    
-class Floor(VectorSprite):
-    def create_image(self):
-        self.image = pygame.Surface((64,64))
-        self.image.fill((0, 0, 255))
-        pygame.draw.rect(self.image, (255,0,255), (0,0, 63,63),1)
         self.image.set_colorkey((0,0,0))
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
@@ -480,17 +380,16 @@ class Srock(VectorSprite):
         self.image.set_colorkey((0,0,0))
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
-        
+
 class Coin(VectorSprite):
     def _overwrite_parameters(self):
         self._layer = -5
-    
+
     def create_image(self):
         self.fontsize = 32
         self.color = (255, 165, 0)
         self.text = "0"
         self.image = make_text(self.text, self.color, self.fontsize)
-        print(self.image)
         #write(self.image
         self.image.set_colorkey((0, 0, 0))
         self.image.convert_alpha()
@@ -508,23 +407,21 @@ class Goldrock(VectorSprite):
         self.image.set_colorkey((0,0,0))
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
-        
+
 class StairDown(VectorSprite):
     def _overwrite_parameters(self):
         self._layer = -5
-    
+
     def create_image(self):
         self.fontsize = 32
         self.color = (255, 165, 0)
         self.text = "<"
         self.image = make_text(self.text, self.color, self.fontsize)
-        print(self.image)
-        #write(self.image
         self.image.set_colorkey((0, 0, 0))
         self.image.convert_alpha()
         self.image0 = self.image.copy()
         self.rect = self.image.get_rect()
-        
+
 class Smoke(VectorSprite):
 
     def create_image(self):
@@ -548,7 +445,7 @@ class Smoke(VectorSprite):
 
 
 class Explosion():
-    
+
     def __init__(self, pos, maxspeed=150, minspeed=20, color=(255,255,0),maxduration=2.5,gravityy=3.7,sparksmin=5,sparksmax=20, a1=0,a2=360):
 
         for s in range(random.randint(sparksmin,sparksmax)):
@@ -557,28 +454,28 @@ class Explosion():
             v.rotate_ip(a)
             g = pygame.math.Vector2(0, - gravityy)
             speed = random.randint(minspeed, maxspeed)     #150
-            duration = random.random() * maxduration     
+            duration = random.random() * maxduration
             Spark(pos=pygame.math.Vector2(pos.x, pos.y), angle=a, move=v*speed,
                   max_age = duration, color=color, gravity = g)
-         
+
 class Spark(VectorSprite):
 
     def __init__(self, **kwargs):
         VectorSprite.__init__(self, **kwargs)
         if "gravity" not in kwargs:
             self.gravity = pygame.math.Vector2(0, -3.7)
-    
+
     def _overwrite_parameters(self):
         self._layer = 8
         self.kill_on_edge = True
-    
+
     def create_image(self):
         r,g,b = self.color
         r = randomize_color(r,75)    #50
         g = randomize_color(g,75)
         b = randomize_color(b,75)
         self.image = pygame.Surface((10,10))
-        pygame.draw.line(self.image, (r,g,b), 
+        pygame.draw.line(self.image, (r,g,b),
                          (10,5), (5,5), 3)
         pygame.draw.line(self.image, (r,g,b),
                           (5,5), (2,5), 1)
@@ -595,13 +492,13 @@ class Rocket(VectorSprite):
     def __init__(self, **kwargs):
         self.readyToLaunchTime = 0
         VectorSprite.__init__(self, **kwargs)
-        
+
         self.damage = 3
         self.color = (255,156,0)
         self.create_image()
 
     def _overwrite_parameters(self):
-        self._layer = 1    
+        self._layer = 1
 
     def create_image(self):
         self.angle = 90
@@ -625,7 +522,7 @@ class Rocket(VectorSprite):
             self.move = self.move.normalize() * self.speed
             # --- Smoke ---
             if random.random() < 0.2 and self.age > 0.1:
-                Smoke(pos=pygame.math.Vector2(self.pos.x, self.pos.y), 
+                Smoke(pos=pygame.math.Vector2(self.pos.x, self.pos.y),
                    gravity=pygame.math.Vector2(0,4), max_age = 4)
         self.oldage = self.age
         VectorSprite.update(self, seconds)
@@ -635,7 +532,7 @@ class Rocket(VectorSprite):
 
     def kill(self):
         Explosion(pos=pygame.math.Vector2(self.pos.x, self.pos.y),max_age=2.1, color=(200,255,255), damage = self.damage)
-        VectorSprite.kill(self)    
+        VectorSprite.kill(self)
 
 
 
@@ -681,40 +578,37 @@ class PygView(object):
         self.paint()
         self.loadbackground()
         self.loadlevel()
-    
+
     def loadlevel(self):
         with open("dungeon.txt", "r") as f:
             self.lines = f.readlines()
-        print(self.lines)
-        print(len(self.lines))
         for y, line in enumerate(self.lines):
             for x, char in enumerate(line):
-                print(x,y)
                 if char == "#":
-                    p = pygame.math.Vector2(x * 20+10, -y*20-10) 
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     #print(p.x, p.y)
                     Wall(pos=p)
                 elif char == "@":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
-                    self.player3.pos = p 
+                    self.player.pos = p
                 elif char == "<":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     StairDown(pos=p)
                 elif char == "s":
-                    p = pygame.math.Vector2(x * 20+10, -y*20-10) 
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     #print(p.x, p.y)
                     Srock(pos=p)
                 elif char == "c":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     Coin(pos=p)
                 elif char == "g":
-                    p = pygame.math.Vector2(x * 20+10, -y*20-10) 
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     #print(p.x, p.y)
                     Goldrock(pos=p)
-    
-    
+
+
     def loadbackground(self):
-        
+
         try:
             self.background = pygame.image.load(os.path.join("data",
                  self.backgroundfilenames[PygView.wave %
@@ -722,49 +616,37 @@ class PygView(object):
         except:
             self.background = pygame.Surface(self.screen.get_size()).convert()
             self.background.fill((255,255,255)) # fill background white
-            
+
         self.background = pygame.transform.scale(self.background,
                           (PygView.width,PygView.height))
         self.background.convert()
-        
+
 
     def paint(self):
         """painting on the surface and create sprites"""
         self.allgroup =  pygame.sprite.LayeredUpdates() # for drawing
-        self.tracergroup = pygame.sprite.Group()
-        self.mousegroup = pygame.sprite.Group()
         self.explosiongroup = pygame.sprite.Group()
         self.tilegroup = pygame.sprite.Group()
         self.nogogroup = pygame.sprite.Group()
         self.playergroup = pygame.sprite.Group()
         self.stairgroup = pygame.sprite.Group()
         self.digablegroup = pygame.sprite.Group()
-        
-        Mouse.groups = self.allgroup, self.mousegroup
+        self.coingroup = pygame.sprite.Group()
+
         VectorSprite.groups = self.allgroup
         Flytext.groups = self.allgroup
         Explosion.groups= self.allgroup, self.explosiongroup
         Wall.groups = self.allgroup, self.tilegroup, self.nogogroup, self.digablegroup
-        Coin.groups = self.allgroup, self.tilegroup
+        Coin.groups = self.allgroup, self.tilegroup, self.coingroup
         Srock.groups = self.allgroup, self.tilegroup, self.nogogroup
         Goldrock.groups = self.allgroup, self.tilegroup, self.nogogroup
-        Floor.groups = self.allgroup, self.tilegroup
         StairDown.groups = self.allgroup, self.tilegroup, self.stairgroup
         Player.groups = self.allgroup, self.playergroup
         Spark.groups = self.allgroup
-        
-   
-        # ------ player1,2,3: mouse, keyboard, joystick ---
-        self.mouse1 = Mouse(control="mouse", color=(255,0,0))
-        self.mouse2 = Mouse(control='keyboard1', color=(255,255,0))
-        self.mouse3 = Mouse(control="keyboard2", color=(255,0,255))
-        self.mouse4 = Mouse(control="joystick1", color=(255,128,255))
-        self.mouse5 = Mouse(control="joystick2", color=(255,255,255))
 
-        self.eck = Dreieck(warp_on_edge=True, pos=pygame.math.Vector2(PygView.width/2,-PygView.height/2))
-        self.player3 = Player(pos = pygame.math.Vector2(100,-100))
+        self.player = Player(pos = pygame.math.Vector2(100,-100))
         #Flytext(PygView.width/2, PygView.height/2,  "@", color=(255,0,0), duration = 3, fontsize=20)
-   
+
     def run(self):
         """The mainloop"""
         running = True
@@ -785,7 +667,7 @@ class PygView(object):
             #Game over?
             #if not gameOver:
             # -------- events ------
-            self.player3.move = pygame.math.Vector2(0,0) # rumstehen
+            self.player.move = pygame.math.Vector2(0,0) # rumstehen
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -793,55 +675,25 @@ class PygView(object):
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
-                    # if event.key == pygame.K_d :
-                    #    self.eck.set_angle(0)
-                    #    Flytext(PygView.width/2, PygView.height/2,  "set_angle: 0°", color=(255,0,0), duration = 3, fontsize=20)
-                    # if event.key == pygame.K_e:
-                    #     self.eck.set_angle(45)
-                    #     Flytext(PygView.width/2, PygView.height/2,  "set_angle: 45°", color=(255,0,0), duration = 3, fontsize=20)
-                    # if event.key == pygame.K_w:
-                    #    self.eck.set_angle(90)
-                    #    Flytext(PygView.width/2, PygView.height/2,  "set_angle: 90°", color=(255,0,0), duration = 3, fontsize=20)
-                    # if event.key == pygame.K_q:
-                    #    self.eck.set_angle(135)
-                    #     Flytext(PygView.width/2, PygView.height/2,  "set_angle: 135°", color=(255,0,0), duration = 3, fontsize=20)
-                    # if event.key == pygame.K_a:
-                    #    self.eck.set_angle(180)
-                    #    Flytext(PygView.width/2, PygView.height/2,  "set_angle: 180°", color=(255,0,0), duration = 3, fontsize=20)
-                    # if event.key == pygame.K_y:
-                    #     self.eck.set_angle(225)
-                    #     Flytext(PygView.width/2, PygView.height/2,  "set_angle: 225°", color=(255,0,0), duration = 3, fontsize=20)
-                    # if event.key == pygame.K_x:
-                    #    self.eck.set_angle(270)
-                    #    Flytext(PygView.width/2, PygView.height/2,  "set_angle: 270°", color=(255,0,0), duration = 3, fontsize=20)
-                    # if event.key == pygame.K_c:
-                    #     self.eck.set_angle(315)
-                    #     Flytext(PygView.width/2, PygView.height/2,  "set_angle: 315°", color=(255,0,0), duration = 3, fontsize=20)
-                   
-                    #if event.key == pygame.K_s:
-                    #    mausvector = pygame.math.Vector2(self.mouse1.x, -self.mouse1.y)
-                    #    eckvector = pygame.math.Vector2(self.eck.pos.x, self.eck.pos.y)
-                    #    diffvector = mausvector - eckvector
-                    #    rechtsvector = pygame.math.Vector2(1,0)
-                    #    angle = rechtsvector.angle_to(diffvector)
-                        #self.eck.rotate(m)
-                    #    Flytext(PygView.width/2, PygView.height/2,  "angle = {}".format(angle), color=(255,0,0), duration = 3, fontsize=20)
-                    # ---- -simple movement for self.eck -------
-                    
+
                     if event.key == pygame.K_RIGHT:
-                        x = self.player3.pos.x + 20
-                        y = self.player3.pos.y + 0
+                        x = self.player.pos.x + 20
+                        y = self.player.pos.y + 0
+                        for c in self.coingroup:
+                            if c.pos.x == x and c.pos.y == y:
+                                self.player.coins += 1
+                                Explosion(pos=pygame.math.Vector2(c.pos.x, c.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (255, 255, 0))
+                                c.kill()
+                                break
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
                                 if d.pos.x == x and d.pos.y == y:
-                                    if self.player3.endurance > 0:
+                                    if self.player.endurance > 0:
                                         print("buddle nach rechts")
                                         Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
                                         d.kill()
-                                        self.player3.endurance -= 1
+                                        self.player.endurance -= 1
                                         break
-                        x = self.player3.pos.x + 20
-                        y = self.player3.pos.y + 0
                         # is da was?
                         for w in self.nogogroup:
                             if w.pos.x == x and w.pos.y == y:
@@ -849,21 +701,27 @@ class PygView(object):
                                 ex = w.pos.x-10
                                 ey = w.pos.y
                                 ep = pygame.math.Vector2(ex,ey)
-                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = 100, a2 = 260)
+                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = 100, a2 = 260, color= (255, 0, 255))
                                 break
                         else:
-                            self.player3.pos += pygame.math.Vector2(20,0)
+                            self.player.pos += pygame.math.Vector2(20,0)
                     if event.key == pygame.K_LEFT:
-                        x = self.player3.pos.x - 20
-                        y = self.player3.pos.y + 0
+                        x = self.player.pos.x - 20
+                        y = self.player.pos.y + 0
+                        for c in self.coingroup:
+                            if c.pos.x == x and c.pos.y == y:
+                                self.player.coins += 1
+                                Explosion(pos=pygame.math.Vector2(c.pos.x, c.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (255, 255, 0))
+                                c.kill()
+                                break
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
                                 if d.pos.x == x and d.pos.y == y:
-                                    if self.player3.endurance > 0:
+                                    if self.player.endurance > 0:
                                         print("buddle nach links")
                                         Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
                                         d.kill()
-                                        self.player3.endurance -= 1
+                                        self.player.endurance -= 1
                                         break
                         # is da was?
                         for w in self.nogogroup:
@@ -872,24 +730,28 @@ class PygView(object):
                                 ex = w.pos.x+10
                                 ey = w.pos.y
                                 ep = pygame.math.Vector2(ex,ey)
-                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = 80, a2 = -80)
+                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = 80, a2 = -80, color= (255, 0, 255))
                                 break
                         else:
-                            self.player3.pos += pygame.math.Vector2(-20,0)
+                            self.player.pos += pygame.math.Vector2(-20,0)
                     if event.key == pygame.K_UP:
-                        x = self.player3.pos.x + 0
-                        y = self.player3.pos.y + 20
+                        x = self.player.pos.x + 0
+                        y = self.player.pos.y + 20
+                        for c in self.coingroup:
+                            if c.pos.x == x and c.pos.y == y:
+                                self.player.coins += 1
+                                Explosion(pos=pygame.math.Vector2(c.pos.x, c.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (255, 255, 0))
+                                c.kill()
+                                break
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
                                 if d.pos.x == x and d.pos.y == y:
-                                    if self.player3.endurance > 0:
+                                    if self.player.endurance > 0:
                                         print("buddle nach oben")
                                         Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
                                         d.kill()
-                                        self.player3.endurance -= 1
+                                        self.player.endurance -= 1
                                         break
-                        x = self.player3.pos.x + 0
-                        y = self.player3.pos.y + 20
                         # is da was?
                         for w in self.nogogroup:
                             if w.pos.x == x and w.pos.y == y:
@@ -897,24 +759,28 @@ class PygView(object):
                                 ex = w.pos.x
                                 ey = w.pos.y-10
                                 ep = pygame.math.Vector2(ex,ey)
-                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = -10, a2 = -170)
+                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = -10, a2 = -170, color= (255, 0, 255))
                                 break
                         else:
-                            self.player3.pos += pygame.math.Vector2(0,20)
+                            self.player.pos += pygame.math.Vector2(0,20)
                     if event.key == pygame.K_DOWN:
-                        x = self.player3.pos.x + 0
-                        y = self.player3.pos.y - 20
+                        x = self.player.pos.x + 0
+                        y = self.player.pos.y - 20
+                        for c in self.coingroup:
+                            if c.pos.x == x and c.pos.y == y:
+                                self.player.coins += 1
+                                Explosion(pos=pygame.math.Vector2(c.pos.x, c.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (255, 255, 0))
+                                c.kill()
+                                break
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
                                 if d.pos.x == x and d.pos.y == y:
-                                    if self.player3.endurance > 0:
+                                    if self.player.endurance > 0:
                                         print("buddle nach unten")
                                         Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
                                         d.kill()
-                                        self.player3.endurance -= 1
+                                        self.player.endurance -= 1
                                         break
-                        x = self.player3.pos.x + 0
-                        y = self.player3.pos.y - 20
                         # is da was?
                         for w in self.nogogroup:
                             if w.pos.x == x and w.pos.y == y:
@@ -922,24 +788,21 @@ class PygView(object):
                                 ex = w.pos.x
                                 ey = w.pos.y+10
                                 ep = pygame.math.Vector2(ex,ey)
-                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = 10, a2 = 170)
+                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = 10, a2 = 170, color= (255, 0, 255))
                                 break
                         else:
-                            self.player3.pos += pygame.math.Vector2(0,-20)
-                    
+                            self.player.pos += pygame.math.Vector2(0,-20)
+
                     if event.key == pygame.K_LESS:
                         for s in self.stairgroup:
-                            if s.pos.x == self.player3.pos.x and s.pos.y == self.player3.pos.y:
+                            if s.pos.x == self.player.pos.x and s.pos.y == self.player.pos.y:
                                 #PygView.numbers = {}
                                 for tile in self.tilegroup:
                                     tile.kill()
+                                self.player.endurance = self.player.max_endurance
                                 dungeonGenerator.start()
                                 self.loadlevel()
-                    # ---- stop movement for self.eck -----
-                    if event.key == pygame.K_r:
-                        self.eck.move *= 0.1 # remove 90% of movement
-                    
-   
+
             # delete everything on screen
             self.screen.blit(self.background, (0, 0))
             # ganzes kasterl
@@ -948,88 +811,25 @@ class PygView(object):
             pygame.draw.rect(self.screen, (133, 11, 133), (PygView.width-215, 20, 200, 30), 10)
             # unteres endurance rect
             pygame.draw.rect(self.screen, (133, 11, 133), (PygView.width-215, 75, 200, 30), 10)
-            write(self.screen, "HP: {}".format(self.player3.phitpoints), 1315, 200, (255, 0, 0), 20, True)
-            write(self.screen, "Endurance: {}".format(self.player3.endurance), 1315, 225, (255, 0, 0), 20, True)
-            write(self.screen, "Coins: {}".format(self.player3.coins), 1315, 250, (255, 0, 0), 20, True)
-            # hp = self.player3.phitpoints
-            # hpfull = self.player3.max_phitpoints
-            hp = self.player3.phitpoints / ( self.player3.max_phitpoints / 100) 
-            #50 / ( 50 / 100) 
-            if self.player3.phitpoints > 0:
+            write(self.screen, "HP: {}".format(self.player.phitpoints), 1315, 200, (255, 0, 0), 20, True)
+            write(self.screen, "Endurance: {}".format(self.player.endurance), 1315, 225, (255, 0, 0), 20, True)
+            write(self.screen, "Coins: {}".format(self.player.coins), 1315, 250, (255, 0, 0), 20, True)
+            # hp = self.player.phitpoints
+            # hpfull = self.player.max_phitpoints
+            hp = self.player.phitpoints / ( self.player.max_phitpoints / 100)
+            #50 / ( 50 / 100)
+            if self.player.phitpoints > 0:
                 pygame.draw.rect(self.screen, (0, 255, 0), (PygView.width-215, 26, int(hp*2), 19))
-            ed = self.player3.endurance / (self.player3.max_endurance / 100)
-            if self.player3.endurance > 0:
-                pygame.draw.rect(self.screen, (0, 0, 255), (PygView.width-215, 81, int(ed*2), 19))
-            
-            if self.player3.phitpoints <= 0:
-                self.player3.phitpoints = 0
-            elif self.player3.phitpoints >= self.player3.max_phitpoints:
-                self.player3.phitpoints = 50
-            
-            # ------ move indicator for self.eck -----
-            pygame.draw.circle(self.screen, (0,255,0), (100,100), 100,1)
-            glitter = (0, random.randint(128, 255), 0)
-            pygame.draw.line(self.screen, glitter, (100,100), 
-                            (100 + self.eck.move.x, 100 - self.eck.move.y))
-            
-            
-            # --- line from eck to mouse ---
-            pygame.draw.line(self.screen, (random.randint(200,250),0,0), (self.eck.pos.x, -self.eck.pos.y), (self.mouse1.x, self.mouse1.y))
+            ed = self.player.endurance / (self.player.max_endurance / 100)
+            if self.player.endurance > 0:
+                pygame.draw.rect(self.screen, (0, 150, 200), (PygView.width-215, 81, int(ed*2), 19))
 
-            # ------------ pressed keys ------
-            pressed_keys = pygame.key.get_pressed()
-            
+            if self.player.phitpoints <= 0:
+                self.player.phitpoints = 0
+            elif self.player.phitpoints >= self.player.max_phitpoints:
+                self.player.phitpoints = 50
 
-            # if pressed_keys[pygame.K_LSHIFT]:
-                # paint range circles for cannons
-            if pressed_keys[pygame.K_a]:
-                self.eck.rotate(3)
-            if pressed_keys[pygame.K_d]:
-                self.eck.rotate(-3)
-            if pressed_keys[pygame.K_w]:
-                v = pygame.math.Vector2(1,0)
-                v.rotate_ip(self.eck.angle)
-                self.eck.move += v
-            if pressed_keys[pygame.K_s]:
-                v = pygame.math.Vector2(1,0)
-                v.rotate_ip(self.eck.angle)
-                self.eck.move += -v
-    
-            
-            # ------ mouse handler ------
-            left,middle,right = pygame.mouse.get_pressed()
-            #if oldleft and not left:
-            #    self.launchRocket(pygame.mouse.get_pos())
-            #if right:
-            #    self.launchRocket(pygame.mouse.get_pos())
-            oldleft, oldmiddle, oldright = left, middle, right
 
-            # ------ joystick handler -------
-            mouses = [self.mouse4, self.mouse5]
-            for number, j in enumerate(self.joysticks):
-                if number == 0:
-                   x = j.get_axis(0)
-                   y = j.get_axis(1)
-                   mouses[number].x += x * 20 # *2 
-                   mouses[number].y += y * 20 # *2 
-                   buttons = j.get_numbuttons()
-                   for b in range(buttons):
-                       pushed = j.get_button( b )
-                       #if b == 0 and pushed:
-                       #        self.launchRocket((mouses[number].x, mouses[number].y))
-                       #elif b == 1 and pushed:
-                       #    if not self.mouse4.pushed: 
-                       #        self.launchRocket((mouses[number].x, mouses[number].y))
-                       #        mouses[number] = True
-                       #elif b == 1 and not pushed:
-                       #    mouses[number] = False
-            pos1 = pygame.math.Vector2(pygame.mouse.get_pos())
-            pos2 = self.mouse2.rect.center
-            pos3 = self.mouse3.rect.center
-        
-            # write text below sprites
-            write(self.screen, "FPS: {:8.3}".format(
-                self.clock.get_fps() ), x=10, y=10)
             self.allgroup.update(seconds)
 
             # --------- collision detection between target and Explosion -----
@@ -1041,24 +841,14 @@ class PygView(object):
             #        if random.random() < 0.5:
             #            Fire(pos = t.pos, max_age=3, bossnumber=t.number)
 
-            
+
             # ----------- clear, draw , update, flip -----------------
             self.allgroup.draw(self.screen)
 
-            
-            # --- Martins verbesserter Mousetail -----
-            for mouse in self.mousegroup:
-                if len(mouse.tail)>2:
-                    for a in range(1,len(mouse.tail)):
-                        r,g,b = mouse.color
-                        pygame.draw.line(self.screen,(r-a,g,b),
-                                     mouse.tail[a-1],
-                                     mouse.tail[a],10-a*10//10)
-            
             # -------- next frame -------------
             pygame.display.flip()
         #-----------------------------------------------------
-        pygame.mouse.set_visible(True)    
+        pygame.mouse.set_visible(True)
         pygame.quit()
 
 if __name__ == '__main__':
