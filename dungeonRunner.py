@@ -429,10 +429,12 @@ class Player(VectorSprite):
    
     def _overwrite_parameters(self):
         self._layer = 5
-        self.hitpoints = 50
+        self.phitpoints = 50
+        self.max_phitpoints = 50
         self.endurance = 100
-    
-    
+        self.max_endurance = 100
+        self.coins = 0
+        
     def create_image(self):
         self.fontsize = 32
         self.color = (255, 0, 255)
@@ -473,17 +475,36 @@ class Srock(VectorSprite):
 
     def create_image(self):
         self.image = pygame.Surface((20, 20))
-        self.image.fill((11, 139, 11))
+        self.image.fill((0, 110, 0))
         pygame.draw.rect(self.image, (255,0,255), (0,0, 19,19),1)
         self.image.set_colorkey((0,0,0))
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
         
-class Bush(VectorSprite):
+class Coin(VectorSprite):
+    def _overwrite_parameters(self):
+        self._layer = -5
+    
     def create_image(self):
-        self.image = pygame.Surface((64,64))
-        self.image.fill((78, 23, 32))
-        pygame.draw.rect(self.image, (255,0,255), (0,0, 63,63),1)
+        self.fontsize = 32
+        self.color = (255, 165, 0)
+        self.text = "0"
+        self.image = make_text(self.text, self.color, self.fontsize)
+        print(self.image)
+        #write(self.image
+        self.image.set_colorkey((0, 0, 0))
+        self.image.convert_alpha()
+        self.image0 = self.image.copy()
+        self.rect = self.image.get_rect()
+
+class Goldrock(VectorSprite):
+    def _overwrite_parameters(self):
+        self._layer = 5
+
+    def create_image(self):
+        self.image = pygame.Surface((20, 20))
+        self.image.fill((255, 255, 0))
+        pygame.draw.rect(self.image, (255,0,255), (0,0, 19,19),1)
         self.image.set_colorkey((0,0,0))
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
@@ -683,7 +704,13 @@ class PygView(object):
                     p = pygame.math.Vector2(x * 20+10, -y*20-10) 
                     #print(p.x, p.y)
                     Srock(pos=p)
-    
+                elif char == "c":
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
+                    Coin(pos=p)
+                elif char == "g":
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10) 
+                    #print(p.x, p.y)
+                    Goldrock(pos=p)
     
     
     def loadbackground(self):
@@ -711,14 +738,16 @@ class PygView(object):
         self.nogogroup = pygame.sprite.Group()
         self.playergroup = pygame.sprite.Group()
         self.stairgroup = pygame.sprite.Group()
+        self.digablegroup = pygame.sprite.Group()
         
         Mouse.groups = self.allgroup, self.mousegroup
         VectorSprite.groups = self.allgroup
         Flytext.groups = self.allgroup
         Explosion.groups= self.allgroup, self.explosiongroup
-        Wall.groups = self.allgroup, self.tilegroup, self.nogogroup
-        Bush.groups = self.allgroup, self.tilegroup
+        Wall.groups = self.allgroup, self.tilegroup, self.nogogroup, self.digablegroup
+        Coin.groups = self.allgroup, self.tilegroup
         Srock.groups = self.allgroup, self.tilegroup, self.nogogroup
+        Goldrock.groups = self.allgroup, self.tilegroup, self.nogogroup
         Floor.groups = self.allgroup, self.tilegroup
         StairDown.groups = self.allgroup, self.tilegroup, self.stairgroup
         Player.groups = self.allgroup, self.playergroup
@@ -745,6 +774,8 @@ class PygView(object):
         gameOver = False
         exittime = 0
         while running:
+            #print(pygame.key.get_mods())
+            pressed_keys = pygame.key.get_pressed()
             milliseconds = self.clock.tick(self.fps) #
             seconds = milliseconds / 1000
             self.playtime += seconds
@@ -800,6 +831,17 @@ class PygView(object):
                     if event.key == pygame.K_RIGHT:
                         x = self.player3.pos.x + 20
                         y = self.player3.pos.y + 0
+                        if pressed_keys[pygame.K_LSHIFT]:
+                            for d in self.digablegroup:
+                                if d.pos.x == x and d.pos.y == y:
+                                    if self.player3.endurance > 0:
+                                        print("buddle nach rechts")
+                                        Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
+                                        d.kill()
+                                        self.player3.endurance -= 1
+                                        break
+                        x = self.player3.pos.x + 20
+                        y = self.player3.pos.y + 0
                         # is da was?
                         for w in self.nogogroup:
                             if w.pos.x == x and w.pos.y == y:
@@ -814,6 +856,15 @@ class PygView(object):
                     if event.key == pygame.K_LEFT:
                         x = self.player3.pos.x - 20
                         y = self.player3.pos.y + 0
+                        if pressed_keys[pygame.K_LSHIFT]:
+                            for d in self.digablegroup:
+                                if d.pos.x == x and d.pos.y == y:
+                                    if self.player3.endurance > 0:
+                                        print("buddle nach links")
+                                        Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
+                                        d.kill()
+                                        self.player3.endurance -= 1
+                                        break
                         # is da was?
                         for w in self.nogogroup:
                             if w.pos.x == x and w.pos.y == y:
@@ -828,6 +879,17 @@ class PygView(object):
                     if event.key == pygame.K_UP:
                         x = self.player3.pos.x + 0
                         y = self.player3.pos.y + 20
+                        if pressed_keys[pygame.K_LSHIFT]:
+                            for d in self.digablegroup:
+                                if d.pos.x == x and d.pos.y == y:
+                                    if self.player3.endurance > 0:
+                                        print("buddle nach oben")
+                                        Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
+                                        d.kill()
+                                        self.player3.endurance -= 1
+                                        break
+                        x = self.player3.pos.x + 0
+                        y = self.player3.pos.y + 20
                         # is da was?
                         for w in self.nogogroup:
                             if w.pos.x == x and w.pos.y == y:
@@ -840,6 +902,17 @@ class PygView(object):
                         else:
                             self.player3.pos += pygame.math.Vector2(0,20)
                     if event.key == pygame.K_DOWN:
+                        x = self.player3.pos.x + 0
+                        y = self.player3.pos.y - 20
+                        if pressed_keys[pygame.K_LSHIFT]:
+                            for d in self.digablegroup:
+                                if d.pos.x == x and d.pos.y == y:
+                                    if self.player3.endurance > 0:
+                                        print("buddle nach unten")
+                                        Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
+                                        d.kill()
+                                        self.player3.endurance -= 1
+                                        break
                         x = self.player3.pos.x + 0
                         y = self.player3.pos.y - 20
                         # is da was?
@@ -869,10 +942,29 @@ class PygView(object):
    
             # delete everything on screen
             self.screen.blit(self.background, (0, 0))
-            pygame.draw.rect(self.screen, (255, 0, 255), (PygView.width-230, 0, 230, PygView.height))
-            write(self.screen, "HP: {}".format(self.player3.hitpoints), 1315, 100, (0, 255, 0), 20, True)
-            write(self.screen, "Endurance: {}".format(self.player3.endurance), 1315, 127, (0, 255, 0), 20, True)
+            # ganzes kasterl
+            pygame.draw.rect(self.screen, (255, 165, 0), (PygView.width-230, 0, 230, PygView.height))
+            # oberes hp kasterl
+            pygame.draw.rect(self.screen, (133, 11, 133), (PygView.width-215, 20, 200, 30), 10)
+            # unteres endurance rect
+            pygame.draw.rect(self.screen, (133, 11, 133), (PygView.width-215, 75, 200, 30), 10)
+            write(self.screen, "HP: {}".format(self.player3.phitpoints), 1315, 200, (255, 0, 0), 20, True)
+            write(self.screen, "Endurance: {}".format(self.player3.endurance), 1315, 225, (255, 0, 0), 20, True)
+            write(self.screen, "Coins: {}".format(self.player3.coins), 1315, 250, (255, 0, 0), 20, True)
+            # hp = self.player3.phitpoints
+            # hpfull = self.player3.max_phitpoints
+            hp = self.player3.phitpoints / ( self.player3.max_phitpoints / 100) 
+            #50 / ( 50 / 100) 
+            if self.player3.phitpoints > 0:
+                pygame.draw.rect(self.screen, (0, 255, 0), (PygView.width-215, 26, int(hp*2), 19))
+            ed = self.player3.endurance / (self.player3.max_endurance / 100)
+            if self.player3.endurance > 0:
+                pygame.draw.rect(self.screen, (0, 0, 255), (PygView.width-215, 81, int(ed*2), 19))
             
+            if self.player3.phitpoints <= 0:
+                self.player3.phitpoints = 0
+            elif self.player3.phitpoints >= self.player3.max_phitpoints:
+                self.player3.phitpoints = 50
             
             # ------ move indicator for self.eck -----
             pygame.draw.circle(self.screen, (0,255,0), (100,100), 100,1)
