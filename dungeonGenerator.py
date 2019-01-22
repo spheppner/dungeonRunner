@@ -2,14 +2,14 @@ def start():
 
     import random
 
-    legend = {".": {"name": "floor",
+    legend = {".": {"name": "pebble",
                     "prob": None,
                     "max": None,
                     "character": "."},
-              "b": {"name": "bush",
+              "c": {"name": "coin",
                     "prob": 0.05,
-                    "max": 10,
-                    "character": "b"},
+                    "max": None,
+                    "character": "c"},
               "#": {"name": "rock",
                     "prob": 0.2,
                     "max": 30,
@@ -18,6 +18,10 @@ def start():
                     "prob": 0.4,
                     "max": None,
                     "character": "s"},
+              "g": {"name": "gold rock",
+                    "prob": 0.025,
+                    "max": None,
+                    "character": "g"},
               "<": {"name": "stair down",
                     "prob": 0.05,
                     "max": None,
@@ -39,21 +43,24 @@ def start():
     rock_nr = 0
 
     maxpebbles = legend["."]["max"]
-    maxbushes = legend["b"]["max"]
+    maxcoins = legend["c"]["max"]
     maxrocks = legend["#"]["max"]
     maxsrocks = legend["s"]["max"]
+    maxgoldrocks = legend["g"]["max"]
     maxstairsdown = legend["<"]["max"]
 
     pebble_prob = legend["."]["prob"]
-    bush_prob = legend["b"]["prob"]
+    coin_prob = legend["c"]["prob"]
     rock_prob = legend["#"]["prob"]
     srock_prob = legend["s"]["prob"]
+    goldrock_prob = legend["g"]["prob"]
     stairdown_prob = legend["<"]["prob"]
 
     pebble_character = legend["."]["character"]
-    bush_character = legend["b"]["character"]
+    coin_character = legend["c"]["character"]
     rock_character = legend["#"]["character"]
     srock_character = legend["s"]["character"]
+    goldrock_character = legend["g"]["character"]
     stairdown_character = legend["<"]["character"]
     player_character = legend["@"]["character"]
 
@@ -62,17 +69,17 @@ def start():
         #if line == 0 or line == 1 or line == 2 or line == 3 or line == 4 or line == 5 or line == 6 or line == 7 or line == 8 or line == 9:
         for x, char in enumerate(range(maxchars)):
             if x == 0 or x == maxchars-1 or y == 0 or y == maxlines-1:
-                l.append("s")
+                l.append(srock_character)
             #l.append(random.choice(list(legend.keys())))
             else:
-                l.append(random.choice(("#")))
+                l.append(random.choice((rock_character)))
         d.append(l)
         
     # ---- snake ----
 
     y = random.randint(1, maxlines-1)
     for x in range(1, maxchars-1):
-        d[y][x] = "."
+        d[y][x] = pebble_character
         z = random.random()
         if z < 0.5:
             # i want to go deeper
@@ -80,7 +87,7 @@ def start():
             if y + howmuch < maxlines-2:
                 for _ in range(howmuch):
                     y += 1
-                    d[y][x] = "."
+                    d[y][x] = pebble_character
         #elif z < 0.5:
         else:
             # i want to go higher
@@ -88,7 +95,7 @@ def start():
             if y - howmuch > 1:
                 for _ in range(howmuch):
                     y -= 1
-                    d[y][x] = "."
+                    d[y][x] = pebble_character
         # ---- new room? ----
         if rt == 1:
             rt = 0
@@ -109,21 +116,21 @@ def start():
     # --- snake2 ---
 
     for x in range(1, maxchars-1):
-        d[y][x] = "."
+        d[y][x] = pebble_character
         if random.random() > 0.5:
             # i want to go deeper
             howmuch = random.randint(1, 7)
             if y + howmuch < maxlines-2:
                 for _ in range(howmuch):
                     y += 1
-                    d[y][x] = "."
+                    d[y][x] = pebble_character
         elif random.random() < 0.5:
             # i want to go higher
             howmuch = random.randint(1, 7)
             if y - howmuch > 1:
                 for _ in range(howmuch):
                     y -= 1
-                    d[y][x] = "."
+                    d[y][x] = pebble_character
         # ---- new room? ----
         elif rt == 1:
             rt = 0
@@ -176,19 +183,18 @@ def start():
                     if random.random() < rock_prob:
                         if rock_nr < maxrocks and y > y1 and y < y1+ h and x > x1 and x < x1+b:
                             rock_nr += 1
-                            d[y][x] = "#"
-
+                            d[y][x] = rock_character
     pebbles = []
     for y, line in enumerate(d):
         for x, char in enumerate(line):
-            if d[y][x] == ".":
+            if d[y][x] == pebble_character:
                 pebbles.append((x,y))
     max_pebbles = len(pebbles)
     
     walls = []
     for y, line in enumerate(d):
         for x, char in enumerate(line):
-            if d[y][x] == "#":
+            if d[y][x] == rock_character:
                 walls.append((x, y))
     max_walls = len(walls)
 
@@ -196,11 +202,11 @@ def start():
 
     random.shuffle(pebbles)
     n = 0
-    for n in range(2, random.randint(1, max_pebbles//4)):
+    for n in range(1, random.randint(1, max_pebbles//4)):
         x = pebbles[n][0]
         y = pebbles[n][1]
-        if random.random() < bush_prob:
-            d[y][x] = "b"
+        if random.random() < coin_prob:
+            d[y][x] = coin_character
 
     # treppenschleife
 
@@ -208,20 +214,26 @@ def start():
     n = 0
     x = pebbles[n][0]
     y = pebbles[n][1]
-    d[y][x] = "<"
+    d[y][x] = stairdown_character
 
     for n in range(1, random.randint(1, max_pebbles//4)):
         x = pebbles[n][0]
         y = pebbles[n][1]
         if random.random() < stairdown_prob:
-            d[y][x] = "<"
+            d[y][x] = stairdown_character
     
     random.shuffle(walls)
     for n in range(0, random.randint(1, max_walls//4)):
         x = walls[n][0]
         y = walls[n][1]
         if random.random() < srock_prob:
-            d[y][x] = "s"
+            d[y][x] = srock_character
+    random.shuffle(walls)
+    for n in range(0, random.randint(1, max_walls//4)):
+        x = walls[n][0]
+        y = walls[n][1]
+        if random.random() < goldrock_prob:
+            d[y][x] = goldrock_character
     
     # player generiert
 
@@ -229,7 +241,7 @@ def start():
     n = 0
     x = pebbles[n][0]
     y = pebbles[n][1]
-    d[y][x] = "@"
+    d[y][x] = player_character
 
 
     # ---- dungeon printer ----
