@@ -1,3 +1,9 @@
+"""
+author: Simon HEPPNER
+website: simon.heppner.at
+email: simon@heppner.at
+name of game: dungeonrunner
+"""
 import pygame
 #import math
 import dungeonGenerator
