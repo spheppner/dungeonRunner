@@ -1,12 +1,3 @@
-"""
-author: Horst JENS
-email: horstjens@gmail.com
-contact: see http://spielend-programmieren.at/de:kontakt
-license: gpl, see http://www.gnu.org/licenses/gpl-3.0.de.html
-download:
-idea: clean python3/pygame template using pygame.math.vector2
-
-"""
 import pygame
 #import math
 import dungeonGenerator
@@ -355,7 +346,19 @@ class Player(VectorSprite):
         self.image.convert_alpha()
         self.image0 = self.image.copy()
         self.rect = self.image.get_rect()
+        
+class Grid(VectorSprite):
 
+    def _overwrite_parameters(self):
+        self._layer = -10
+
+    def create_image(self):
+        self.image = pygame.Surface((20, 20))
+        pygame.draw.rect(self.image, (229,229,229), (0,0, 19,19),1)
+        self.image.set_colorkey((0,0,0))
+        self.image.convert_alpha()
+        self.rect = self.image.get_rect()
+        
 class Wall(VectorSprite):
 
     def _overwrite_parameters(self):
@@ -365,6 +368,19 @@ class Wall(VectorSprite):
         self.image = pygame.Surface((20, 20))
         self.image.fill((0, 255, 0))
         pygame.draw.rect(self.image, (255,0,255), (0,0, 19,19),1)
+        self.image.set_colorkey((0,0,0))
+        self.image.convert_alpha()
+        self.rect = self.image.get_rect()
+
+class Floor(VectorSprite):
+
+    def _overwrite_parameters(self):
+        self._layer = -5
+
+    def create_image(self):
+        self.image = pygame.Surface((20, 20))
+        self.image.fill((255, 255, 255))
+        pygame.draw.rect(self.image, (229,229,229), (0,0, 19,19),1)
         self.image.set_colorkey((0,0,0))
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
@@ -390,7 +406,6 @@ class Coin(VectorSprite):
         self.color = (255, 165, 0)
         self.text = "0"
         self.image = make_text(self.text, self.color, self.fontsize)
-        #write(self.image
         self.image.set_colorkey((0, 0, 0))
         self.image.convert_alpha()
         self.image0 = self.image.copy()
@@ -600,6 +615,9 @@ class PygView(object):
             self.lines = f.readlines()
         for y, line in enumerate(self.lines):
             for x, char in enumerate(line):
+                if x < len(line)-1:
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
+                    Grid(pos=p)
                 if char == "#":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     Wall(pos=p)
@@ -621,6 +639,9 @@ class PygView(object):
                 elif char == "S":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     Shop(pos=p)
+                elif char == ".":
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
+                    Floor(pos=p)
 
 
     def loadbackground(self):
@@ -649,6 +670,7 @@ class PygView(object):
         self.digablegroup = pygame.sprite.Group()
         self.coingroup = pygame.sprite.Group()
         self.shopgroup = pygame.sprite.Group()
+        self.floorgroup = pygame.sprite.Group()
 
         VectorSprite.groups = self.allgroup
         Flytext.groups = self.allgroup
@@ -661,6 +683,8 @@ class PygView(object):
         Player.groups = self.allgroup, self.playergroup
         Spark.groups = self.allgroup
         Shop.groups = self.allgroup, self.shopgroup
+        Floor.groups = self.allgroup, self.floorgroup
+        Grid.groups = self.allgroup, self.floorgroup
 
         self.player = Player(pos = pygame.math.Vector2(100,-100))
         #Flytext(PygView.width/2, PygView.height/2,  "@", color=(255,0,0), duration = 3, fontsize=20)
