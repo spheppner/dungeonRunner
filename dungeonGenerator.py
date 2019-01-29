@@ -29,12 +29,17 @@ def start():
               "@": {"name": "Player",
                     "prob": None,
                     "max": 1,
-                    "character": "@"}
+                    "character": "@"},
+              "S": {"name": "Shop",
+                    "prob": 0.1,
+                    "max": 1,
+                    "character": "S"}
               }
 
     rooms = []
     d = []
     rt = 1
+    sps = 1
 
     maxlines = 40
     maxchars = 60
@@ -48,6 +53,7 @@ def start():
     maxsrocks = legend["s"]["max"]
     maxgoldrocks = legend["g"]["max"]
     maxstairsdown = legend["<"]["max"]
+    maxshops = legend["S"]["max"]
 
     pebble_prob = legend["."]["prob"]
     coin_prob = legend["c"]["prob"]
@@ -55,6 +61,7 @@ def start():
     srock_prob = legend["s"]["prob"]
     goldrock_prob = legend["g"]["prob"]
     stairdown_prob = legend["<"]["prob"]
+    shop_prob = legend["S"]["prob"]
 
     pebble_character = legend["."]["character"]
     coin_character = legend["c"]["character"]
@@ -63,6 +70,7 @@ def start():
     goldrock_character = legend["g"]["character"]
     stairdown_character = legend["<"]["character"]
     player_character = legend["@"]["character"]
+    shop_character = legend["S"]["character"]
 
     for y, line in enumerate(range(maxlines)):
         l = []
@@ -222,12 +230,15 @@ def start():
         if random.random() < stairdown_prob:
             d[y][x] = stairdown_character
     
+    # steinschleifen
+    
     random.shuffle(walls)
     for n in range(0, random.randint(1, max_walls//4)):
         x = walls[n][0]
         y = walls[n][1]
         if random.random() < srock_prob:
             d[y][x] = srock_character
+            
     random.shuffle(walls)
     for n in range(0, random.randint(1, max_walls//4)):
         x = walls[n][0]
@@ -242,7 +253,19 @@ def start():
     x = pebbles[n][0]
     y = pebbles[n][1]
     d[y][x] = player_character
-
+    
+    # shop generiert
+    
+    random.shuffle(pebbles)
+    n = 0
+    x = pebbles[n][0]
+    y = pebbles[n][1]
+    if random.random() < shop_prob:
+        if sps == 1:
+            print("Erfolg!")
+            sps = 0
+            d[y][x] = shop_character
+    
 
     # ---- dungeon printer ----
 
