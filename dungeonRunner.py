@@ -109,83 +109,6 @@ class Flytext(pygame.sprite.Sprite):
             if self.time > self.duration:
                 self.kill()      # remove Sprite from screen and from groups
 
-#class Mouse(pygame.sprite.Sprite):
-#    def __init__(self, radius = 50, color=(255,0,0), x=320, y=240,
-#                    startx=100,starty=100, control="mouse", ):
-#        """create a (black) surface and paint a blue Mouse on it"""
-#        self._layer=10
-#        pygame.sprite.Sprite.__init__(self,self.groups)
-#        self.radius = radius
-#        self.color = color
-#        self.startx=startx
-#        self.starty=starty
-#        self.x = x
-#        self.y = y
-#        self.dx = 0
-#        self.dy = 0
-#        self.r = color[0]
-#        self.g = color[1]
-#        self.b = color[2]
-#        self.delta = -10
-#        self.age = 0
-#        self.pos = pygame.mouse.get_pos()
-#        self.move = 0
-#        self.tail=[]
-#        self.create_image()
-#        self.rect = self.image.get_rect()
-#        self.control = control # "mouse" "keyboard1" "keyboard2"
-#        self.pushed = False
-#
-#    def create_image(self):
-#
-#        self.image = pygame.surface.Surface((self.radius*0.5, self.radius*0.5))
-#        delta1 = 12.5
-#        delta2 = 25
-#        w = self.radius*0.5 / 100.0
-#        h = self.radius*0.5 / 100.0
-#        # pointing down / up
-#        for y in (0,2,4):
-#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-#                         (35*w,0+y),(50*w,15*h+y),2)
-#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-#                         (50*w,15*h+y),(65*w,0+y),2)##
-#
-#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-#                         (35*w,100*h-y),(50*w,85*h-y),2)
-#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-#                         (50*w,85*h-y),(65*w,100*h-y),2)
-#        # pointing right / left
-#        for x in (0,2,4):
-#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-#                         (0+x,35*h),(15*w+x,50*h),2)
-#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-#                         (15*w+x,50*h),(0+x,65*h),2)##
-#
-#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-#                         (100*w-x,35*h),(85*w-x,50*h),2)
-#            pygame.draw.line(self.image,(self.r-delta2,self.g,self.b),
-#                         (85*w-x,50*h),(100*w-x,65*h),2)
-#        self.image.set_colorkey((0,0,0))
-#        self.rect=self.image.get_rect()
-#        self.rect.center = self.x, self.y##
-#
-#    def update(self, seconds):
-#        if self.control == "keyboard2":
-#            pressed = pygame.key.get_pressed()
-#            if pressed[pygame.K_RSHIFT]:
-#                delta = 2
-#            else:
-#                delta = 9
-#            if pressed[pygame.K_UP]:
-#                self.y -= delta
-#            if pressed[pygame.K_DOWN]:
-#                self.y += delta
-#            if pressed[pygame.K_LEFT]:
-#                self.x -= delta
-#            if pressed[pygame.K_RIGHT]:
-#                self.x += delta
-#        self.create_image()##
-
 class VectorSprite(pygame.sprite.Sprite):
     """base class for sprites. this class inherits from pygames sprite class"""
     number = 0
@@ -352,7 +275,7 @@ class Player(VectorSprite):
         self.image.convert_alpha()
         self.image0 = self.image.copy()
         self.rect = self.image.get_rect()
-            
+
 class Grid(VectorSprite):
 
     def _overwrite_parameters(self):
@@ -364,7 +287,7 @@ class Grid(VectorSprite):
         self.image.set_colorkey((0,0,0))
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
-        
+
 class Wall(VectorSprite):
 
     def _overwrite_parameters(self):
@@ -404,19 +327,27 @@ class Coin(VectorSprite):
         self.image0 = self.image.copy()
         self.rect = self.image.get_rect()
 
-class Item(VectorSprite):
+class GoldLicense(VectorSprite):
+    
     def _overwrite_parameters(self):
         self._layer = -5
+        self.item_name = "Goldmining License"
+        self.item_price = random.randint(15, 45)
 
     def create_image(self):
         self.fontsize = 32
-        self.color = (255, 165, 0)
-        self.text = "i"
+        self.color = (255, 127, 0)
+        self.text = self.item_name[0]
         self.image = make_text(self.text, self.color, self.fontsize)
         self.image.set_colorkey((0, 0, 0))
         self.image.convert_alpha()
         self.image0 = self.image.copy()
         self.rect = self.image.get_rect()
+
+    def get_item_price(self):
+        return self.item_price
+    def get_item_name(self):
+        return self.item_name
 
 class ExitChar(VectorSprite):
     def _overwrite_parameters(self):
@@ -606,6 +537,9 @@ class PygView(object):
         self.onshop = False
         self.onexitchar = False
         self.fstart = True
+        self.item_list = ["Goldmining License", "Nothing"]
+        self.inventory = []
+        self.onbuyitem = False
         # ------ background images ------
         self.backgroundfilenames = [] # every .jpg file in folder 'data'
         try:
@@ -665,7 +599,7 @@ class PygView(object):
                             p = pygame.math.Vector2(float(player_pos_splitted[0]), -float(player_pos_splitted[1]))
                             self.player.pos.x = float(player_pos_splitted[0])
                             self.player.pos.y = float(player_pos_splitted[1])
-                        else:  
+                        else:
                             p = pygame.math.Vector2(x * 20+10, -y*20-10)
                             self.player.pos = p
                 elif char == "<":
@@ -685,12 +619,16 @@ class PygView(object):
                     Shop(pos=p)
                 elif char == "i":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
-                    Item(pos=p)
+                    n = random.randint(1, len(self.item_list))
+                    if n == 1:
+                        pass
+                    elif n == 2:
+                        GoldLicense(pos=p)
                 elif char == "e":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     ExitChar(pos=p)
-            
-                        
+
+
     def loadbackground(self):
 
         try:
@@ -720,21 +658,23 @@ class PygView(object):
         self.floorgroup = pygame.sprite.Group()
         self.exitchargroup = pygame.sprite.Group()
         self.pickupgroup = pygame.sprite.Group()
-        
+        self.mineablegroup = pygame.sprite.Group()
+        self.buyablegroup = pygame.sprite.Group()
+
         VectorSprite.groups = self.allgroup
         Flytext.groups = self.allgroup
         Explosion.groups= self.allgroup, self.explosiongroup
         Wall.groups = self.allgroup, self.tilegroup, self.nogogroup, self.digablegroup
         Coin.groups = self.allgroup, self.tilegroup, self.coingroup
         Srock.groups = self.allgroup, self.tilegroup, self.nogogroup
-        Goldrock.groups = self.allgroup, self.tilegroup, self.nogogroup
+        Goldrock.groups = self.allgroup, self.tilegroup, self.nogogroup, self.mineablegroup
         StairDown.groups = self.allgroup, self.tilegroup, self.stairgroup
         Player.groups = self.allgroup, self.playergroup
         Spark.groups = self.allgroup
         Shop.groups = self.allgroup, self.tilegroup, self.shopgroup
         Grid.groups = self.allgroup, self.tilegroup, self.floorgroup
-        Item.groups = self.allgroup, self.tilegroup, self.pickupgroup
         ExitChar.groups = self.allgroup, self.tilegroup, self.exitchargroup
+        GoldLicense.groups = self.allgroup, self.tilegroup, self.buyablegroup
 
         self.player = Player(pos = pygame.math.Vector2(100,-100))
         #Flytext(PygView.width/2, PygView.height/2,  "@", color=(255,0,0), duration = 3, fontsize=20)
@@ -767,7 +707,6 @@ class PygView(object):
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
-
                     if event.key == pygame.K_RIGHT:
                         x = self.player.pos.x + 20
                         y = self.player.pos.y + 0
@@ -787,6 +726,12 @@ class PygView(object):
                                 self.onexitchar = True
                             else:
                                 self.onexitchar = False
+                        for b in self.buyablegroup:
+                            if b.pos.x == x and b.pos.y == y:
+                                self.onbuyitem = True
+                            elif self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
+                                self.onbuyitem = True
+                                
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
                                 if d.pos.x == x and d.pos.y == y:
@@ -817,6 +762,9 @@ class PygView(object):
                                 for e in self.exitchargroup:
                                     if e.pos.x == self.player.pos.x and e.pos.y == self.player.pos.y:
                                         self.onexitchar = True
+                                for b in self.buyablegroup:
+                                    if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                        self.onbuyitem = True
                                 break
                         else:
                             for s in self.shopgroup:
@@ -825,8 +773,15 @@ class PygView(object):
                             for e in self.exitchargroup:
                                 if self.player.pos.x == e.pos.x and self.player.pos.y == e.pos.y:
                                     self.onexitchar = False
+                            for b in self.buyablegroup:
+                                if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                    self.onbuyitem = False
+                                
                             self.player.pos += pygame.math.Vector2(20,0)
-                            
+                            for b in self.buyablegroup:
+                                if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                    self.onbuyitem = True
+
                     if event.key == pygame.K_LEFT:
                         x = self.player.pos.x - 20
                         y = self.player.pos.y + 0
@@ -846,6 +801,11 @@ class PygView(object):
                                 self.onexitchar = True
                             else:
                                 self.onexitchar = False
+                        for b in self.buyablegroup:
+                            if b.pos.x == x and b.pos.y == y:
+                                self.onbuyitem = True
+                            elif self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
+                                self.onbuyitem = True
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
                                 if d.pos.x == x and d.pos.y == y:
@@ -876,6 +836,9 @@ class PygView(object):
                                 for e in self.exitchargroup:
                                     if e.pos.x == self.player.pos.x and e.pos.y == self.player.pos.y:
                                         self.onexitchar = True
+                                for b in self.buyablegroup:
+                                    if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                        self.onbuyitem = True
                                 break
                         else:
                             for s in self.shopgroup:
@@ -884,7 +847,15 @@ class PygView(object):
                             for e in self.exitchargroup:
                                 if self.player.pos.x == e.pos.x and self.player.pos.y == e.pos.y:
                                     self.onexitchar = False
+                            for b in self.buyablegroup:
+                                if self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
+                                    self.onbuyitem = False
+                                elif b.pos.x == x and b.pos.y == y:
+                                    self.onbuyitem = True
                             self.player.pos += pygame.math.Vector2(-20,0)
+                            for b in self.buyablegroup:
+                                if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                    self.onbuyitem = True
                     if event.key == pygame.K_UP:
                         x = self.player.pos.x + 0
                         y = self.player.pos.y + 20
@@ -904,6 +875,11 @@ class PygView(object):
                                 self.onexitchar = True
                             else:
                                 self.onexitchar = False
+                        for b in self.buyablegroup:
+                            if b.pos.x == x and b.pos.y == y:
+                                self.onbuyitem = True
+                            elif self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
+                                self.onbuyitem = True
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
                                 if d.pos.x == x and d.pos.y == y:
@@ -934,6 +910,9 @@ class PygView(object):
                                 for e in self.exitchargroup:
                                     if e.pos.x == self.player.pos.x and e.pos.y == self.player.pos.y:
                                         self.onexitchar = True
+                                for b in self.buyablegroup:
+                                    if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                        self.onbuyitem = True
                                 break
                         else:
                             for s in self.shopgroup:
@@ -942,7 +921,15 @@ class PygView(object):
                             for e in self.exitchargroup:
                                 if self.player.pos.x == e.pos.x and self.player.pos.y == e.pos.y:
                                     self.onexitchar = False
+                            for b in self.buyablegroup:
+                                if self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
+                                    self.onbuyitem = False
+                                elif b.pos.x == x and b.pos.y == y:
+                                    self.onbuyitem = True
                             self.player.pos += pygame.math.Vector2(0,20)
+                            for b in self.buyablegroup:
+                                if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                    self.onbuyitem = True
                     if event.key == pygame.K_DOWN:
                         x = self.player.pos.x + 0
                         y = self.player.pos.y - 20
@@ -962,6 +949,11 @@ class PygView(object):
                                 self.onexitchar = True
                             else:
                                 self.onexitchar = False
+                        for b in self.buyablegroup:
+                            if b.pos.x == x and b.pos.y == y:
+                                self.onbuyitem = True
+                            elif self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
+                                self.onbuyitem = True
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
                                 if d.pos.x == x and d.pos.y == y:
@@ -992,6 +984,9 @@ class PygView(object):
                                 for e in self.exitchargroup:
                                     if e.pos.x == self.player.pos.x and e.pos.y == self.player.pos.y:
                                         self.onexitchar = True
+                                for b in self.buyablegroup:
+                                    if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                        self.onbuyitem = True
                                 break
                         else:
                             for s in self.shopgroup:
@@ -1000,7 +995,15 @@ class PygView(object):
                             for e in self.exitchargroup:
                                 if self.player.pos.x == e.pos.x and self.player.pos.y == e.pos.y:
                                     self.onexitchar = False
+                            for b in self.buyablegroup:
+                                if self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
+                                    self.onbuyitem = False
+                                elif b.pos.x == x and b.pos.y == y:
+                                    self.onbuyitem = True
                             self.player.pos += pygame.math.Vector2(0,-20)
+                            for b in self.buyablegroup:
+                                if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                    self.onbuyitem = True
 
                     if event.key == pygame.K_LESS:
                         for s in self.stairgroup:
@@ -1037,9 +1040,25 @@ class PygView(object):
             write(self.screen, "HP: {}/{}".format(self.player.phitpoints, self.player.max_phitpoints), 1315, 200, (255, 0, 0), 20, True)
             write(self.screen, "Endurance: {}/{}".format(self.player.endurance, self.player.max_endurance), 1315, 225, (255, 0, 0), 20, True)
             write(self.screen, "Coins: {}".format(self.player.coins), 1315, 250, (255, 0, 0), 20, True)
-            if self.onshop is True:
-                write(self.screen, "Standing on shop.", 1315, 450, (255, 0, 0), 20, True)
-                write(self.screen, "Press ENTER!", 1315, 475, (255, 0, 0), 20, True)
+            write(self.screen, "FPS: {:6.3}".format(self.clock.get_fps()), 1315, 275, (255, 0, 0), 20, True)
+            if self.onshop is True and self.shopActive is False:
+                write(self.screen, "Standing on SHOP.", 1315, 450, (255, 0, 0), 20, True)
+                write(self.screen, "Press ENTER", 1315, 475, (255, 0, 0), 20, True)
+                write(self.screen, "to [e]nter!", 1315, 500, (255, 0, 0), 20, True)
+            elif self.onexitchar is True and self.shopActive is True:
+                write(self.screen, "Standing on EXIT.", 1315, 450, (255, 0, 0), 20, True)
+                write(self.screen, "Press E", 1315, 475, (255, 0, 0), 20, True)
+                write(self.screen, "to [e]xit!", 1315, 500, (255, 0, 0), 20, True)
+            elif self.onbuyitem is True and self.shopActive is True:
+                for b in self.buyablegroup:
+                    if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                        price = b.get_item_price()
+                        name = b.get_item_name()
+                write(self.screen, "Standing on:", 1315, 450, (255, 0, 0), 20, True)
+                write(self.screen, "{}.".format(name), 1315, 475, (255, 0, 0), 20, True)
+                write(self.screen, "Costs: {}.".format(price), 1315, 500, (255, 0, 0), 20, True)
+                write(self.screen, "Press B", 1315, 525, (255, 0, 0), 20, True)
+                write(self.screen, "to [b]uy!", 1315, 550, (255, 0, 0), 20, True)
             # hp = self.player.phitpoints
             # hpfull = self.player.max_phitpoints
             hp = self.player.phitpoints / ( self.player.max_phitpoints / 100)
