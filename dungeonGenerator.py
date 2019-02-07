@@ -260,8 +260,8 @@ def start():
     n = 0
     x = pebbles[n][0]
     y = pebbles[n][1]
-    if random.random() < shop_prob:
-        if sps == 1:
+    if sps == 1:
+        if random.random() < shop_prob:
             print("Erfolg!")
             sps = 0
             d[y][x] = shop_character
