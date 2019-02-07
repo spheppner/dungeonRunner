@@ -336,7 +336,7 @@ class VectorSprite(pygame.sprite.Sprite):
 class Player(VectorSprite):
 
     def _overwrite_parameters(self):
-        self._layer = 5
+        self._layer = 50
         self.phitpoints = 50
         self.max_phitpoints = 50
         self.endurance = 100
@@ -352,7 +352,7 @@ class Player(VectorSprite):
         self.image.convert_alpha()
         self.image0 = self.image.copy()
         self.rect = self.image.get_rect()
-        
+            
 class Grid(VectorSprite):
 
     def _overwrite_parameters(self):
@@ -378,19 +378,6 @@ class Wall(VectorSprite):
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
 
-class Floor(VectorSprite):
-
-    def _overwrite_parameters(self):
-        self._layer = -5
-
-    def create_image(self):
-        self.image = pygame.Surface((20, 20))
-        self.image.fill((255, 255, 255))
-        pygame.draw.rect(self.image, (229,229,229), (0,0, 19,19),1)
-        self.image.set_colorkey((0,0,0))
-        self.image.convert_alpha()
-        self.rect = self.image.get_rect()
-
 class Srock(VectorSprite):
     def _overwrite_parameters(self):
         self._layer = 5
@@ -411,6 +398,34 @@ class Coin(VectorSprite):
         self.fontsize = 32
         self.color = (255, 165, 0)
         self.text = "0"
+        self.image = make_text(self.text, self.color, self.fontsize)
+        self.image.set_colorkey((0, 0, 0))
+        self.image.convert_alpha()
+        self.image0 = self.image.copy()
+        self.rect = self.image.get_rect()
+
+class Item(VectorSprite):
+    def _overwrite_parameters(self):
+        self._layer = -5
+
+    def create_image(self):
+        self.fontsize = 32
+        self.color = (255, 165, 0)
+        self.text = "i"
+        self.image = make_text(self.text, self.color, self.fontsize)
+        self.image.set_colorkey((0, 0, 0))
+        self.image.convert_alpha()
+        self.image0 = self.image.copy()
+        self.rect = self.image.get_rect()
+
+class ExitChar(VectorSprite):
+    def _overwrite_parameters(self):
+        self._layer = -5
+
+    def create_image(self):
+        self.fontsize = 32
+        self.color = (255, 0, 0)
+        self.text = "-"
         self.image = make_text(self.text, self.color, self.fontsize)
         self.image.set_colorkey((0, 0, 0))
         self.image.convert_alpha()
@@ -589,6 +604,8 @@ class PygView(object):
         self.fps = fps
         self.playtime = 0.0
         self.onshop = False
+        self.onexitchar = False
+        self.fstart = True
         # ------ background images ------
         self.backgroundfilenames = [] # every .jpg file in folder 'data'
         try:
@@ -616,9 +633,18 @@ class PygView(object):
         self.loadbackground()
         self.loadlevel()
 
-    def loadlevel(self):
-        with open("dungeon.txt", "r") as f:
-            self.lines = f.readlines()
+    def loadlevel(self, shop=False):
+        self.shopActive = shop
+        if self.fstart is True:
+            with open("player_pos.txt", "w") as f:
+                f.write("a" + str("\n"))
+            self.fstart = False
+        if self.shopActive is False:
+            with open("dungeon.txt", "r") as f:
+                self.lines = f.readlines()
+        else:
+            with open("shop.txt", "r") as f:
+                self.lines = f.readlines()
         for y, line in enumerate(self.lines):
             for x, char in enumerate(line):
                 if x < len(line)-1:
@@ -628,8 +654,20 @@ class PygView(object):
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     Wall(pos=p)
                 elif char == "@":
-                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
-                    self.player.pos = p
+                    if self.shopActive is True:
+                        p = pygame.math.Vector2(x * 20+10, -y*20-10)
+                        self.player.pos = p
+                    else:
+                        with open("player_pos.txt", "r") as f:
+                            player_pos = f.readlines()[0]
+                        if player_pos != "a\n":
+                            player_pos_splitted = player_pos.split(",")
+                            p = pygame.math.Vector2(float(player_pos_splitted[0]), -float(player_pos_splitted[1]))
+                            self.player.pos.x = float(player_pos_splitted[0])
+                            self.player.pos.y = float(player_pos_splitted[1])
+                        else:  
+                            p = pygame.math.Vector2(x * 20+10, -y*20-10)
+                            self.player.pos = p
                 elif char == "<":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     StairDown(pos=p)
@@ -645,11 +683,14 @@ class PygView(object):
                 elif char == "S":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     Shop(pos=p)
-                elif char == ".":
+                elif char == "i":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
-                    Floor(pos=p)
-
-
+                    Item(pos=p)
+                elif char == "e":
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
+                    ExitChar(pos=p)
+            
+                        
     def loadbackground(self):
 
         try:
@@ -677,7 +718,9 @@ class PygView(object):
         self.coingroup = pygame.sprite.Group()
         self.shopgroup = pygame.sprite.Group()
         self.floorgroup = pygame.sprite.Group()
-
+        self.exitchargroup = pygame.sprite.Group()
+        self.pickupgroup = pygame.sprite.Group()
+        
         VectorSprite.groups = self.allgroup
         Flytext.groups = self.allgroup
         Explosion.groups= self.allgroup, self.explosiongroup
@@ -688,9 +731,10 @@ class PygView(object):
         StairDown.groups = self.allgroup, self.tilegroup, self.stairgroup
         Player.groups = self.allgroup, self.playergroup
         Spark.groups = self.allgroup
-        Shop.groups = self.allgroup, self.shopgroup
-        Floor.groups = self.allgroup, self.floorgroup
-        Grid.groups = self.allgroup, self.floorgroup
+        Shop.groups = self.allgroup, self.tilegroup, self.shopgroup
+        Grid.groups = self.allgroup, self.tilegroup, self.floorgroup
+        Item.groups = self.allgroup, self.tilegroup, self.pickupgroup
+        ExitChar.groups = self.allgroup, self.tilegroup, self.exitchargroup
 
         self.player = Player(pos = pygame.math.Vector2(100,-100))
         #Flytext(PygView.width/2, PygView.height/2,  "@", color=(255,0,0), duration = 3, fontsize=20)
@@ -738,6 +782,11 @@ class PygView(object):
                                 self.onshop = True
                             else:
                                 self.onshop = False
+                        for e in self.exitchargroup:
+                            if e.pos.x == x and e.pos.y == y:
+                                self.onexitchar = True
+                            else:
+                                self.onexitchar = False
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
                                 if d.pos.x == x and d.pos.y == y:
@@ -745,11 +794,15 @@ class PygView(object):
                                         print("buddle nach rechts")
                                         Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
                                         d.kill()
-                                        self.player.endurance -= 1
+                                        if self.shopActive is False:
+                                            self.player.endurance -= 1
                                         break
                                 for s in self.shopgroup:
                                     if s.pos.x != self.player.pos.x and s.pos.y != self.player.pos.y:
                                         self.onshop = False
+                                for e in self.exitchargroup:
+                                    if e.pos.x != self.player.pos.x and e.pos.y != self.player.pos.y:
+                                        self.onexitchar = False
                         # is da was?
                         for w in self.nogogroup:
                             if w.pos.x == x and w.pos.y == y:
@@ -761,11 +814,17 @@ class PygView(object):
                                 for s in self.shopgroup:
                                     if s.pos.x == self.player.pos.x and s.pos.y == self.player.pos.y:
                                         self.onshop = True
+                                for e in self.exitchargroup:
+                                    if e.pos.x == self.player.pos.x and e.pos.y == self.player.pos.y:
+                                        self.onexitchar = True
                                 break
                         else:
                             for s in self.shopgroup:
                                 if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
                                     self.onshop = False
+                            for e in self.exitchargroup:
+                                if self.player.pos.x == e.pos.x and self.player.pos.y == e.pos.y:
+                                    self.onexitchar = False
                             self.player.pos += pygame.math.Vector2(20,0)
                             
                     if event.key == pygame.K_LEFT:
@@ -782,6 +841,11 @@ class PygView(object):
                                 self.onshop = True
                             else:
                                 self.onshop = False
+                        for e in self.exitchargroup:
+                            if e.pos.x == x and e.pos.y == y:
+                                self.onexitchar = True
+                            else:
+                                self.onexitchar = False
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
                                 if d.pos.x == x and d.pos.y == y:
@@ -789,11 +853,15 @@ class PygView(object):
                                         print("buddle nach links")
                                         Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
                                         d.kill()
-                                        self.player.endurance -= 1
+                                        if self.shopActive is False:
+                                            self.player.endurance -= 1
                                         break
                                 for s in self.shopgroup:
                                     if s.pos.x != self.player.pos.x and s.pos.y != self.player.pos.y:
                                         self.onshop = False
+                                for e in self.exitchargroup:
+                                    if e.pos.x != self.player.pos.x and e.pos.y != self.player.pos.y:
+                                        self.onexitchar = False
                         # is da was?
                         for w in self.nogogroup:
                             if w.pos.x == x and w.pos.y == y:
@@ -805,11 +873,17 @@ class PygView(object):
                                 for s in self.shopgroup:
                                     if s.pos.x == self.player.pos.x and s.pos.y == self.player.pos.y:
                                         self.onshop = True
+                                for e in self.exitchargroup:
+                                    if e.pos.x == self.player.pos.x and e.pos.y == self.player.pos.y:
+                                        self.onexitchar = True
                                 break
                         else:
                             for s in self.shopgroup:
                                 if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
                                     self.onshop = False
+                            for e in self.exitchargroup:
+                                if self.player.pos.x == e.pos.x and self.player.pos.y == e.pos.y:
+                                    self.onexitchar = False
                             self.player.pos += pygame.math.Vector2(-20,0)
                     if event.key == pygame.K_UP:
                         x = self.player.pos.x + 0
@@ -825,6 +899,11 @@ class PygView(object):
                                 self.onshop = True
                             else:
                                 self.onshop = False
+                        for e in self.exitchargroup:
+                            if e.pos.x == x and e.pos.y == y:
+                                self.onexitchar = True
+                            else:
+                                self.onexitchar = False
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
                                 if d.pos.x == x and d.pos.y == y:
@@ -832,11 +911,15 @@ class PygView(object):
                                         print("buddle nach oben")
                                         Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
                                         d.kill()
-                                        self.player.endurance -= 1
+                                        if self.shopActive is False:
+                                            self.player.endurance -= 1
                                         break
                                 for s in self.shopgroup:
                                     if s.pos.x != self.player.pos.x and s.pos.y != self.player.pos.y:
                                         self.onshop = False
+                                for e in self.exitchargroup:
+                                    if e.pos.x != self.player.pos.x and e.pos.y != self.player.pos.y:
+                                        self.onexitchar = False
                         # is da was?
                         for w in self.nogogroup:
                             if w.pos.x == x and w.pos.y == y:
@@ -848,11 +931,17 @@ class PygView(object):
                                 for s in self.shopgroup:
                                     if s.pos.x == self.player.pos.x and s.pos.y == self.player.pos.y:
                                         self.onshop = True
+                                for e in self.exitchargroup:
+                                    if e.pos.x == self.player.pos.x and e.pos.y == self.player.pos.y:
+                                        self.onexitchar = True
                                 break
                         else:
                             for s in self.shopgroup:
                                 if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
                                     self.onshop = False
+                            for e in self.exitchargroup:
+                                if self.player.pos.x == e.pos.x and self.player.pos.y == e.pos.y:
+                                    self.onexitchar = False
                             self.player.pos += pygame.math.Vector2(0,20)
                     if event.key == pygame.K_DOWN:
                         x = self.player.pos.x + 0
@@ -868,6 +957,11 @@ class PygView(object):
                                 self.onshop = True
                             else:
                                 self.onshop = False
+                        for e in self.exitchargroup:
+                            if e.pos.x == x and e.pos.y == y:
+                                self.onexitchar = True
+                            else:
+                                self.onexitchar = False
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
                                 if d.pos.x == x and d.pos.y == y:
@@ -875,11 +969,15 @@ class PygView(object):
                                         print("buddle nach unten")
                                         Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
                                         d.kill()
-                                        self.player.endurance -= 1
+                                        if self.shopActive is False:
+                                            self.player.endurance -= 1
                                         break
                                 for s in self.shopgroup:
                                     if s.pos.x != self.player.pos.x and s.pos.y != self.player.pos.y:
                                         self.onshop = False
+                                for e in self.exitchargroup:
+                                    if e.pos.x != self.player.pos.x and e.pos.y != self.player.pos.y:
+                                        self.onexitchar = False
                         # is da was?
                         for w in self.nogogroup:
                             if w.pos.x == x and w.pos.y == y:
@@ -891,11 +989,17 @@ class PygView(object):
                                 for s in self.shopgroup:
                                     if s.pos.x == self.player.pos.x and s.pos.y == self.player.pos.y:
                                         self.onshop = True
+                                for e in self.exitchargroup:
+                                    if e.pos.x == self.player.pos.x and e.pos.y == self.player.pos.y:
+                                        self.onexitchar = True
                                 break
                         else:
                             for s in self.shopgroup:
                                 if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
                                     self.onshop = False
+                            for e in self.exitchargroup:
+                                if self.player.pos.x == e.pos.x and self.player.pos.y == e.pos.y:
+                                    self.onexitchar = False
                             self.player.pos += pygame.math.Vector2(0,-20)
 
                     if event.key == pygame.K_LESS:
@@ -906,11 +1010,22 @@ class PygView(object):
                                     tile.kill()
                                 self.player.endurance = self.player.max_endurance
                                 dungeonGenerator.start()
+                                with open("player_pos.txt", "w") as f:
+                                    f.write("a")
                                 self.loadlevel()
                     if event.key == pygame.K_RETURN:
                         if self.onshop is True:
-                            print("hi")
-                            
+                            with open("player_pos.txt", "w") as f:
+                                for s in self.shopgroup:
+                                    f.write(str(s.pos.x) + "," + str(s.pos.y))
+                            for tile in self.tilegroup:
+                                    tile.kill()
+                            self.loadlevel(shop=True)
+                    if event.key == pygame.K_e:
+                        if self.onexitchar is True:
+                            for tile in self.tilegroup:
+                                tile.kill()
+                            self.loadlevel()
             # delete everything on screen
             self.screen.blit(self.background, (0, 0))
             # ganzes kasterl
