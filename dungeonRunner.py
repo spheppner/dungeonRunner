@@ -265,16 +265,72 @@ class Player(VectorSprite):
         self.endurance = 100
         self.max_endurance = 100
         self.coins = 0
+        self.character = "@"
 
     def create_image(self):
         self.fontsize = 32
         self.color = (255, 0, 255)
-        self.text = "@"
+        self.text = self.character
         self.image = make_text(self.text, self.color, self.fontsize)
         self.image.set_colorkey((0, 0, 0))
         self.image.convert_alpha()
         self.image0 = self.image.copy()
         self.rect = self.image.get_rect()
+
+class Monster(VectorSprite):
+
+    def _overwrite_parameters(self):
+        self._layer = 50
+        self.mhitpoints = 50
+        self.max_mhitpoints = 50
+        self.character = "M"
+        self.p_moving = 0.25 # probability for moving per turn
+        self.intelligence = 0
+        
+    def create_image(self):
+        self.fontsize = 32
+        self.color = (255, 0, 255)
+        self.text = self.character
+        self.image = make_text(self.text, self.color, self.fontsize)
+        self.image.set_colorkey((0, 0, 0))
+        self.image.convert_alpha()
+        self.image0 = self.image.copy()
+        self.rect = self.image.get_rect()
+    
+    def ai(self, target):
+        if self.intelligence == 0:
+            dx, dy = random.choice(((20, 0), (-20, 0), (0, 20), (0, -20)))
+        elif self.intelligence == 1:
+            dx = target.pos.x - self.pos.x
+            dy = target.pos.y - self.pos.y
+            if dx > 0:
+                dx = 20
+            if dx < 0:
+                dx = -20
+            if dy > 0:
+                dy = 20
+            if dy < 0:
+                dy = -20
+        
+        return dx, dy
+
+class Monster1(Monster):
+    def _overwrite_parameters(self):
+        Monster._overwrite_parameters(self)
+        self._layer = 50
+        self.mhitpoints = 25
+        self.max_mhitpoints = 25
+        self.character = "1"
+        self.intelligence = 1
+
+class Monster2(Monster):
+    def _overwrite_parameters(self):
+        Monster._overwrite_parameters(self)
+        self._layer = 50
+        self.mhitpoints = 50
+        self.max_mhitpoints = 50
+        self.character = "2"
+        self.intelligence = 0
 
 class Grid(VectorSprite):
 
@@ -283,7 +339,7 @@ class Grid(VectorSprite):
 
     def create_image(self):
         self.image = pygame.Surface((20, 20))
-        pygame.draw.rect(self.image, (229,229,229), (0,0, 19,19),1)
+        pygame.draw.rect(self.image, (215,215,215), (0,0, 19,19),1)
         self.image.set_colorkey((0,0,0))
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
@@ -570,7 +626,7 @@ class PygView(object):
     def loadlevel(self, shop=False):
         self.shopActive = shop
         if self.fstart is True:
-            with open("player_pos.txt", "w") as f:
+            with open("shop_pos.txt", "w") as f:
                 f.write("a" + str("\n"))
             self.fstart = False
         if self.shopActive is False:
@@ -592,7 +648,7 @@ class PygView(object):
                         p = pygame.math.Vector2(x * 20+10, -y*20-10)
                         self.player.pos = p
                     else:
-                        with open("player_pos.txt", "r") as f:
+                        with open("shop_pos.txt", "r") as f:
                             player_pos = f.readlines()[0]
                         if player_pos != "a\n":
                             player_pos_splitted = player_pos.split(",")
@@ -627,6 +683,12 @@ class PygView(object):
                 elif char == "e":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     ExitChar(pos=p)
+                elif char == "1":
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
+                    Monster1(pos=p)
+                elif char == "2":
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
+                    Monster2(pos=p)
 
 
     def loadbackground(self):
@@ -660,6 +722,7 @@ class PygView(object):
         self.pickupgroup = pygame.sprite.Group()
         self.mineablegroup = pygame.sprite.Group()
         self.buyablegroup = pygame.sprite.Group()
+        self.monstergroup = pygame.sprite.Group()
 
         VectorSprite.groups = self.allgroup
         Flytext.groups = self.allgroup
@@ -675,6 +738,9 @@ class PygView(object):
         Grid.groups = self.allgroup, self.tilegroup, self.floorgroup
         ExitChar.groups = self.allgroup, self.tilegroup, self.exitchargroup
         GoldLicense.groups = self.allgroup, self.tilegroup, self.buyablegroup
+        Monster.groups = self.allgroup, self.tilegroup, self.monstergroup
+        Monster1.groups = self.allgroup, self.tilegroup, self.monstergroup
+        Monster2.groups = self.allgroup, self.tilegroup, self.monstergroup
 
         self.player = Player(pos = pygame.math.Vector2(100,-100))
         #Flytext(PygView.width/2, PygView.height/2,  "@", color=(255,0,0), duration = 3, fontsize=20)
@@ -781,6 +847,7 @@ class PygView(object):
                             for b in self.buyablegroup:
                                 if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
                                     self.onbuyitem = True
+                            self.newturn()
 
                     if event.key == pygame.K_LEFT:
                         x = self.player.pos.x - 20
@@ -856,6 +923,8 @@ class PygView(object):
                             for b in self.buyablegroup:
                                 if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
                                     self.onbuyitem = True
+                            self.newturn()
+                            
                     if event.key == pygame.K_UP:
                         x = self.player.pos.x + 0
                         y = self.player.pos.y + 20
@@ -930,6 +999,8 @@ class PygView(object):
                             for b in self.buyablegroup:
                                 if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
                                     self.onbuyitem = True
+                            self.newturn()
+                            
                     if event.key == pygame.K_DOWN:
                         x = self.player.pos.x + 0
                         y = self.player.pos.y - 20
@@ -1004,6 +1075,7 @@ class PygView(object):
                             for b in self.buyablegroup:
                                 if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
                                     self.onbuyitem = True
+                            self.newturn()
 
                     if event.key == pygame.K_LESS:
                         for s in self.stairgroup:
@@ -1013,22 +1085,25 @@ class PygView(object):
                                     tile.kill()
                                 self.player.endurance = self.player.max_endurance
                                 dungeonGenerator.start()
-                                with open("player_pos.txt", "w") as f:
-                                    f.write("a")
+                                with open("shop_pos.txt", "w") as f:
+                                    f.write("a\n")
                                 self.loadlevel()
                     if event.key == pygame.K_RETURN:
                         if self.onshop is True:
-                            with open("player_pos.txt", "w") as f:
+                            with open("shop_pos.txt", "w") as f:
                                 for s in self.shopgroup:
                                     f.write(str(s.pos.x) + "," + str(s.pos.y))
                             for tile in self.tilegroup:
                                     tile.kill()
                             self.loadlevel(shop=True)
+                    if event.key == pygame.K_SPACE:
+                        self.newturn()
                     if event.key == pygame.K_e:
                         if self.onexitchar is True:
                             for tile in self.tilegroup:
                                 tile.kill()
                             self.loadlevel()
+            
             # delete everything on screen
             self.screen.blit(self.background, (0, 0))
             # ganzes kasterl
@@ -1044,7 +1119,7 @@ class PygView(object):
             if self.onshop is True and self.shopActive is False:
                 write(self.screen, "Standing on SHOP.", 1315, 450, (255, 0, 0), 20, True)
                 write(self.screen, "Press ENTER", 1315, 475, (255, 0, 0), 20, True)
-                write(self.screen, "to [e]nter!", 1315, 500, (255, 0, 0), 20, True)
+                write(self.screen, "to enter!", 1315, 500, (255, 0, 0), 20, True)
             elif self.onexitchar is True and self.shopActive is True:
                 write(self.screen, "Standing on EXIT.", 1315, 450, (255, 0, 0), 20, True)
                 write(self.screen, "Press E", 1315, 475, (255, 0, 0), 20, True)
@@ -1095,6 +1170,30 @@ class PygView(object):
         #-----------------------------------------------------
         pygame.mouse.set_visible(True)
         pygame.quit()
-
+    
+    def newturn(self):
+        for m in self.monstergroup:
+                # will monster wandern?
+                if random.random() < m.p_moving:
+                    #dx, dy = random.choice(((20,0), (-20,0), (0, 20), (0,-20)))
+                    dx, dy = m.ai(target = self.player)
+                    for n in self.nogogroup:
+                        if n.pos.x == m.pos.x + dx and n.pos.y == m.pos.y + dy:
+                            if dx > 0:
+                                b1, b2 = 100, 260
+                            if dx < 0:
+                                b1, b2 = 80, -80
+                            if dy > 0:
+                                b1, b2 = 10, 170
+                            if dy < 0:
+                                b1, b2 = -10, -170
+                            
+                            Explosion(pos=m.pos + pygame.math.Vector2(dx//2,dy//2), maxduration=0.5, gravityy=0, sparksmin= 10, a1 = b1, a2 = b2, color= (255, 0, 255))
+                            dx, dy = 0,0
+                        #else:
+                        #    m.pos += pygame.math.Vector2(dx, dy)
+                    # move the monster
+                    m.pos += pygame.math.Vector2(dx, dy)
+    
 if __name__ == '__main__':
     PygView(1430,800).run() # try PygView(800,600).run()
