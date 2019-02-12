@@ -30,6 +30,18 @@ def start():
                     "prob": None,
                     "max": 1,
                     "character": "@"},
+              "monster": {"name": None,
+                          "prob": None,
+                          "max": 15,
+                          "character": None},
+              "1": {"name": "Monster1",
+                    "prob": 0.25,
+                    "max": None,
+                    "character": "1"},
+              "2": {"name": "Monster2",
+                    "prob": 0.2,
+                    "max": None,
+                    "character": "2"},
               "S": {"name": "Shop",
                     "prob": 0.1,
                     "max": 1,
@@ -54,6 +66,7 @@ def start():
     maxgoldrocks = legend["g"]["max"]
     maxstairsdown = legend["<"]["max"]
     maxshops = legend["S"]["max"]
+    maxmonster = legend["monster"]["max"]
 
     pebble_prob = legend["."]["prob"]
     coin_prob = legend["c"]["prob"]
@@ -62,6 +75,8 @@ def start():
     goldrock_prob = legend["g"]["prob"]
     stairdown_prob = legend["<"]["prob"]
     shop_prob = legend["S"]["prob"]
+    monster1_prob = legend["1"]["prob"]
+    monster2_prob = legend["2"]["prob"]
 
     pebble_character = legend["."]["character"]
     coin_character = legend["c"]["character"]
@@ -71,6 +86,8 @@ def start():
     stairdown_character = legend["<"]["character"]
     player_character = legend["@"]["character"]
     shop_character = legend["S"]["character"]
+    monster1_character = legend["1"]["character"]
+    monster2_character = legend["2"]["character"]
 
     for y, line in enumerate(range(maxlines)):
         l = []
@@ -206,7 +223,7 @@ def start():
                 walls.append((x, y))
     max_walls = len(walls)
 
-    # buschschleife
+    # coinschleife
 
     random.shuffle(pebbles)
     n = 0
@@ -238,13 +255,19 @@ def start():
         y = walls[n][1]
         if random.random() < srock_prob:
             d[y][x] = srock_character
-            
-    random.shuffle(walls)
-    for n in range(0, random.randint(1, max_walls//4)):
-        x = walls[n][0]
-        y = walls[n][1]
-        if random.random() < goldrock_prob:
+        elif random.random() < goldrock_prob:
             d[y][x] = goldrock_character
+    
+    # monsterschleifen
+    
+    random.shuffle(pebbles)
+    for n in range(0, random.randint(1, maxmonster)):
+        x = pebbles[n][0]
+        y = pebbles[n][1]
+        if random.random() < monster1_prob:
+            d[y][x] = monster1_character
+        elif random.random() < monster2_prob:
+            d[y][x] = monster2_character
     
     # player generiert
 
