@@ -629,6 +629,7 @@ class Viewer(object):
         self.item_list = ["Goldmining License", "Nothing"]
         self.inventory = []
         self.onbuyitem = False
+        self.level = 0
         # ------ background images ------
         self.backgroundfilenames = [] # every .jpg file in folder 'data'
         try:
@@ -919,7 +920,13 @@ class Viewer(object):
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
+                    #=============================================
+                    dx = 0
+                    dy = 0
+                    
                     if event.key == pygame.K_RIGHT:
+                        dx = 20
+                        
                         x = self.player.pos.x + 20
                         y = self.player.pos.y + 0
                         for c in self.coingroup:
@@ -979,6 +986,19 @@ class Viewer(object):
                                         self.onbuyitem = True
                                 break
                         else:
+                            # ------------ player wants to go to right ---
+                            #---battle? --
+                            for m in self.monstergroup:
+                                if self.player.pos == m.pos:
+                                    dx, dy = 0, 0
+                                    # do not move into monster
+                                    result = self.battlerun(m)
+                                    if result == 0:
+                                        self.player.hitpoints -= m.damage
+                                    damage = result * self.player.multiplicant
+                                    m.hitpoints -= damage    
+                                    break                           
+                            # -------------
                             for s in self.shopgroup:
                                 if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
                                     self.onshop = False
@@ -989,13 +1009,14 @@ class Viewer(object):
                                 if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
                                     self.onbuyitem = False
                                 
-                            self.player.pos += pygame.math.Vector2(20,0)
+                            self.player.pos += pygame.math.Vector2(dx,dy)
                             for b in self.buyablegroup:
                                 if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
                                     self.onbuyitem = True
                             self.newturn()
-
+#----------------------------------------------------
                     if event.key == pygame.K_LEFT:
+                        dx = -20
                         x = self.player.pos.x - 20
                         y = self.player.pos.y + 0
                         for c in self.coingroup:
@@ -1054,6 +1075,18 @@ class Viewer(object):
                                         self.onbuyitem = True
                                 break
                         else:
+                            
+                            for m in self.monstergroup:
+                                if self.player.pos == m.pos:
+                                    dx, dy = 0, 0
+                                    # do not move into monster
+                                    result = self.battlerun(m)
+                                    if result == 0:
+                                        self.player.hitpoints -= m.damage
+                                    damage = result * self.player.multiplicant
+                                    m.hitpoints -= damage    
+                                    break
+                            
                             for s in self.shopgroup:
                                 if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
                                     self.onshop = False
@@ -1065,13 +1098,15 @@ class Viewer(object):
                                     self.onbuyitem = False
                                 elif b.pos.x == x and b.pos.y == y:
                                     self.onbuyitem = True
-                            self.player.pos += pygame.math.Vector2(-20,0)
+                            self.player.pos += pygame.math.Vector2(dx,dy)
                             for b in self.buyablegroup:
                                 if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
                                     self.onbuyitem = True
                             self.newturn()
                             
                     if event.key == pygame.K_UP:
+                        dy = 20
+                        
                         x = self.player.pos.x + 0
                         y = self.player.pos.y + 20
                         for c in self.coingroup:
@@ -1130,6 +1165,18 @@ class Viewer(object):
                                         self.onbuyitem = True
                                 break
                         else:
+                            
+                            for m in self.monstergroup:
+                                if self.player.pos == m.pos:
+                                    dx, dy = 0, 0
+                                    # do not move into monster
+                                    result = self.battlerun(m)
+                                    if result == 0:
+                                        self.player.hitpoints -= m.damage
+                                    damage = result * self.player.multiplicant
+                                    m.hitpoints -= damage    
+                                    break
+                            
                             for s in self.shopgroup:
                                 if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
                                     self.onshop = False
@@ -1141,13 +1188,14 @@ class Viewer(object):
                                     self.onbuyitem = False
                                 elif b.pos.x == x and b.pos.y == y:
                                     self.onbuyitem = True
-                            self.player.pos += pygame.math.Vector2(0,20)
+                            self.player.pos += pygame.math.Vector2(dx,dy)
                             for b in self.buyablegroup:
                                 if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
                                     self.onbuyitem = True
                             self.newturn()
                             
                     if event.key == pygame.K_DOWN:
+                        dy = -20
                         x = self.player.pos.x + 0
                         y = self.player.pos.y - 20
                         for c in self.coingroup:
@@ -1206,6 +1254,18 @@ class Viewer(object):
                                         self.onbuyitem = True
                                 break
                         else:
+                            
+                            for m in self.monstergroup:
+                                if self.player.pos == m.pos:
+                                    dx, dy = 0, 0
+                                    # do not move into monster
+                                    result = self.battlerun(m)
+                                    if result == 0:
+                                        self.player.hitpoints -= m.damage
+                                    damage = result * self.player.multiplicant
+                                    m.hitpoints -= damage    
+                                    break
+                            
                             for s in self.shopgroup:
                                 if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
                                     self.onshop = False
@@ -1217,7 +1277,7 @@ class Viewer(object):
                                     self.onbuyitem = False
                                 elif b.pos.x == x and b.pos.y == y:
                                     self.onbuyitem = True
-                            self.player.pos += pygame.math.Vector2(0,-20)
+                            self.player.pos += pygame.math.Vector2(dx,dy)
                             for b in self.buyablegroup:
                                 if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
                                     self.onbuyitem = True
@@ -1227,6 +1287,11 @@ class Viewer(object):
                         for s in self.stairgroup:
                             if s.pos.x == self.player.pos.x and s.pos.y == self.player.pos.y:
                                 #Viewer.numbers = {}
+                                #---- GOINg down the stairs ------
+                                self.level += 1
+                                if self.level == 14:
+                                    Flytext(500,500,"You escaped from the dungeon of math", color=(0, 255, 0))
+                                    running = False
                                 for tile in self.tilegroup:
                                     tile.kill()
                                 self.player.endurance = self.player.max_endurance
