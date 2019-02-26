@@ -305,12 +305,17 @@ class Monster(VectorSprite):
             dy = target.pos.y - self.pos.y
             if dx > 0:
                 dx = 20
-            if dx < 0:
+            elif dx < 0:
                 dx = -20
             if dy > 0:
                 dy = 20
-            if dy < 0:
+            elif dy < 0:
                 dy = -20
+            
+            if dx != 0:
+                dy = 0
+            if dy != 0:
+                dx = 0
         
         return dx, dy
 
