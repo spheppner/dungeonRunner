@@ -35,13 +35,21 @@ def start():
                           "max": 15,
                           "character": None},
               "1": {"name": "Monster1",
-                    "prob": 0.25,
+                    "prob": 0.4,
                     "max": None,
                     "character": "1"},
               "2": {"name": "Monster2",
                     "prob": 0.2,
                     "max": None,
                     "character": "2"},
+              "3": {"name": "Monster3",
+                    "prob": 0.15,
+                    "max": None,
+                    "character": "3"},
+              "4": {"name": "Monster4",
+                    "prob": 0.1,
+                    "max": None,
+                    "character": "4"},
               "S": {"name": "Shop",
                     "prob": 0.1,
                     "max": 1,
@@ -77,6 +85,8 @@ def start():
     shop_prob = legend["S"]["prob"]
     monster1_prob = legend["1"]["prob"]
     monster2_prob = legend["2"]["prob"]
+    monster3_prob = legend["3"]["prob"]
+    monster4_prob = legend["4"]["prob"]
 
     pebble_character = legend["."]["character"]
     coin_character = legend["c"]["character"]
@@ -88,6 +98,8 @@ def start():
     shop_character = legend["S"]["character"]
     monster1_character = legend["1"]["character"]
     monster2_character = legend["2"]["character"]
+    monster3_character = legend["3"]["character"]
+    monster4_character = legend["4"]["character"]
 
     for y, line in enumerate(range(maxlines)):
         l = []
@@ -268,6 +280,10 @@ def start():
             d[y][x] = monster1_character
         elif random.random() < monster2_prob:
             d[y][x] = monster2_character
+        elif random.random() < monster3_prob:
+            d[y][x] = monster3_character
+        elif random.random() < monster4_prob:
+            d[y][x] = monster4_character
     
     # player generiert
 
