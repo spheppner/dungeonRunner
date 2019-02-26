@@ -82,7 +82,7 @@ class Flytext(pygame.sprite.Sprite):
     def __init__(self, x, y, text="hallo", color=(255, 0, 0),
                  dx=0, dy=-50, duration=2, acceleration_factor = 1.0, delay = 0, fontsize=22):
         """a text flying upward and for a short time and disappearing"""
-        self._layer = 7  # order of sprite layers (before / behind other sprites)
+        self._layer = 57  # order of sprite layers (before / behind other sprites)
         pygame.sprite.Sprite.__init__(self, self.groups)  # THIS LINE IS IMPORTANT !!
         self.text = text
         self.r, self.g, self.b = color[0], color[1], color[2]
@@ -123,7 +123,9 @@ class VectorSprite(pygame.sprite.Sprite):
         VectorSprite.numbers[self.number] = self
         self.create_image()
         self.distance_traveled = 0 # in pixel
-        self.rect.center = (-300,-300) # avoid blinking image in topleft corner
+        #self.rect.center = (-300,-300) # avoid blinking image in topleft corner
+        self.rect.center = (int(self.pos.x), -int(self.pos.y))
+        
         if self.angle != 0:
             self.set_angle(self.angle)
 
@@ -144,7 +146,7 @@ class VectorSprite(pygame.sprite.Sprite):
         if "static" not in kwargs:
             self.static = False
         if "pos" not in kwargs:
-            self.pos = pygame.math.Vector2(random.randint(0, PygView.width),-50)
+            self.pos = pygame.math.Vector2(random.randint(0, Viewer.width),-50)
         if "move" not in kwargs:
             self.move = pygame.math.Vector2(0,0)
         if "radius" not in kwargs:
@@ -260,11 +262,12 @@ class Player(VectorSprite):
 
     def _overwrite_parameters(self):
         self._layer = 50
-        self.phitpoints = 50
-        self.max_phitpoints = 50
+        self.hitpoints = 50
+        self.max_hitpoints = 50
         self.endurance = 100
         self.max_endurance = 100
         self.coins = 0
+        self.multiplicant = 3
         self.character = "@"
 
     def create_image(self):
@@ -276,12 +279,15 @@ class Player(VectorSprite):
         self.image.convert_alpha()
         self.image0 = self.image.copy()
         self.rect = self.image.get_rect()
+        
+
+            
 
 class Monster(VectorSprite):
 
     def _overwrite_parameters(self):
         self._layer = 50
-        self.mhitpoints = 50
+        self.hitpoints = 50
         self.max_mhitpoints = 50
         self.character = "M"
         self.p_moving = 0.25 # probability for moving per turn
@@ -323,19 +329,41 @@ class Monster1(Monster):
     def _overwrite_parameters(self):
         Monster._overwrite_parameters(self)
         self._layer = 50
-        self.mhitpoints = 25
+        self.hitpoints = 25
         self.max_mhitpoints = 25
         self.character = "1"
-        self.intelligence = 1
+        self.intelligence = 0
+        self.damage = 5
 
 class Monster2(Monster):
     def _overwrite_parameters(self):
         Monster._overwrite_parameters(self)
         self._layer = 50
-        self.mhitpoints = 50
+        self.hitpoints = 50
         self.max_mhitpoints = 50
         self.character = "2"
-        self.intelligence = 0
+        self.intelligence = 1
+        self.damage = 10
+
+class Monster3(Monster):
+    def _overwrite_parameters(self):
+        Monster._overwrite_parameters(self)
+        self._layer = 50
+        self.hitpoints = 75
+        self.max_mhitpoints = 75
+        self.character = "3"
+        self.intelligence = 1
+        self.damage = 15
+
+class Monster4(Monster):
+    def _overwrite_parameters(self):
+        Monster._overwrite_parameters(self)
+        self._layer = 50
+        self.hitpoints = 100
+        self.max_mhitpoints = 100
+        self.character = "4"
+        self.intelligence = 1
+        self.damage = 20
 
 class Grid(VectorSprite):
 
@@ -569,7 +597,7 @@ class Rocket(VectorSprite):
                    gravity=pygame.math.Vector2(0,4), max_age = 4)
         self.oldage = self.age
         VectorSprite.update(self, seconds)
-        # new rockets are stored offscreen 500 pixel below PygView.height
+        # new rockets are stored offscreen 500 pixel below Viewer.height
         if self.age > self.readyToLaunchTime and self.oldage < self.readyToLaunchTime:
             self.pos.y -= 500
 
@@ -579,7 +607,7 @@ class Rocket(VectorSprite):
 
 
 
-class PygView(object):
+class Viewer(object):
     width = 0
     height = 0
 
@@ -587,8 +615,8 @@ class PygView(object):
         """Initialize pygame, window, background, font,...
            default arguments """
         pygame.init()
-        PygView.width = width    # make global readable
-        PygView.height = height
+        Viewer.width = width    # make global readable
+        Viewer.height = height
         self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
         self.background = pygame.Surface(self.screen.get_size()).convert()
         self.background.fill((255,255,255)) # fill background white
@@ -615,9 +643,9 @@ class PygView(object):
         #    print("Error: no .jpg files found")
         #    pygame.quit
         #    sys.exit()
-        PygView.bombchance = 0.015
-        PygView.rocketchance = 0.001
-        PygView.wave = 0
+        Viewer.bombchance = 0.015
+        Viewer.rocketchance = 0.001
+        Viewer.wave = 0
         self.age = 0
         # ------ joysticks ----
         pygame.joystick.init()
@@ -694,20 +722,26 @@ class PygView(object):
                 elif char == "2":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     Monster2(pos=p)
+                elif char == "3":
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
+                    Monster3(pos=p)
+                elif char == "4":
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
+                    Monster4(pos=p)
 
 
     def loadbackground(self):
 
         try:
             self.background = pygame.image.load(os.path.join("data",
-                 self.backgroundfilenames[PygView.wave %
+                 self.backgroundfilenames[Viewer.wave %
                  len(self.backgroundfilenames)]))
         except:
             self.background = pygame.Surface(self.screen.get_size()).convert()
             self.background.fill((255,255,255)) # fill background white
 
         self.background = pygame.transform.scale(self.background,
-                          (PygView.width,PygView.height))
+                          (Viewer.width,Viewer.height))
         self.background.convert()
 
 
@@ -728,9 +762,9 @@ class PygView(object):
         self.mineablegroup = pygame.sprite.Group()
         self.buyablegroup = pygame.sprite.Group()
         self.monstergroup = pygame.sprite.Group()
-
+        self.flytextgroup = pygame.sprite.Group()
         VectorSprite.groups = self.allgroup
-        Flytext.groups = self.allgroup
+        Flytext.groups = self.allgroup, self.flytextgroup
         Explosion.groups= self.allgroup, self.explosiongroup
         Wall.groups = self.allgroup, self.tilegroup, self.nogogroup, self.digablegroup
         Coin.groups = self.allgroup, self.tilegroup, self.coingroup
@@ -746,10 +780,117 @@ class PygView(object):
         Monster.groups = self.allgroup, self.tilegroup, self.monstergroup
         Monster1.groups = self.allgroup, self.tilegroup, self.monstergroup
         Monster2.groups = self.allgroup, self.tilegroup, self.monstergroup
+        Monster3.groups = self.allgroup, self.tilegroup, self.monstergroup
+        Monster4.groups = self.allgroup, self.tilegroup, self.monstergroup
 
         self.player = Player(pos = pygame.math.Vector2(100,-100))
-        #Flytext(PygView.width/2, PygView.height/2,  "@", color=(255,0,0), duration = 3, fontsize=20)
+        #Flytext(Viewer.width/2, Viewer.height/2,  "@", color=(255,0,0), duration = 3, fontsize=20)
 
+    def battlerun(self, opponent):
+           
+        e = opponent.__class__.__name__
+        v = int(e[-1])
+        #if v == 1:
+        a = random.randint(2,10)
+        b = random.randint(2,10)
+        c = a * b
+        Flytext(1315, 450, "? {} x {} ?".format(a,b), duration = 10, fontsize=30, color=(0,0,200), dy=0)
+        running = True
+        self.battleage = 0
+        self.battle_max_time = 10
+        self.answer = ""
+        while running:
+            
+            pressed_keys = pygame.key.get_pressed()
+            milliseconds = self.clock.tick(self.fps) #
+            seconds = milliseconds / 1000
+            self.battleage += seconds
+            if self.battleage > self.battle_max_time:
+                running = False
+            # -------- events ------
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                # ------- pressed and released key ------
+                elif event.type == pygame.KEYDOWN:
+                    #if event.key == pygame.K_ESCAPE:
+                    #    running = False
+                    if event.key == pygame.K_0:
+                        self.answer += "0"
+                    if event.key == pygame.K_1:
+                        self.answer += "1"
+                    if event.key == pygame.K_2:
+                        self.answer += "2"
+                    if event.key == pygame.K_3:
+                        self.answer += "3"
+                    if event.key == pygame.K_4:
+                        self.answer += "4"
+                    if event.key == pygame.K_5:
+                        self.answer += "5"
+                    if event.key == pygame.K_6:
+                        self.answer += "6"
+                    if event.key == pygame.K_7:
+                        self.answer += "7"
+                    if event.key == pygame.K_8:
+                        self.answer += "8"
+                    if event.key == pygame.K_9:
+                        self.answer += "9"
+                    
+            
+            if self.answer != "":
+                #answer = int(self.answer)
+                if int(self.answer) == c:
+                    Flytext(1315, 475, "Correct!", duration = 3, fontsize=30, color=(0,0,200), dy=0)
+                    Flytext(1315, 500, "Answer: {}".format(c), duration = 3, fontsize=30, color=(0,0,200), dy=0)
+                    running = False
+                    # how fast did the player answered...how much time is left
+                    return self.battle_max_time - self.battleage
+            # delete everything on screen
+            self.screen.blit(self.background, (0, 0))
+            # ganzes kasterl
+            pygame.draw.rect(self.screen, (255, 165, 0), (Viewer.width-230, 0, 230, Viewer.height))
+            # oberes hp kasterl
+            pygame.draw.rect(self.screen, (133, 11, 133), (Viewer.width-215, 20, 200, 30), 10)
+            # unteres endurance rect
+            pygame.draw.rect(self.screen, (133, 11, 133), (Viewer.width-215, 75, 200, 30), 10)
+            write(self.screen, "HP: {}/{}".format(self.player.hitpoints, self.player.max_hitpoints), 1315, 200, (255, 0, 0), 20, True)
+            write(self.screen, "Endurance: {}/{}".format(self.player.endurance, self.player.max_endurance), 1315, 225, (255, 0, 0), 20, True)
+            write(self.screen, "Coins: {}".format(self.player.coins), 1315, 250, (255, 0, 0), 20, True)
+            write(self.screen, "FPS: {:6.3}".format(self.clock.get_fps()), 1315, 275, (255, 0, 0), 20, True)
+            hp = self.player.hitpoints / ( self.player.max_hitpoints / 100)
+            if self.player.hitpoints > 0:
+                pygame.draw.rect(self.screen, (0, 255, 0), (Viewer.width-215, 26, int(hp*2), 19))
+            ed = self.player.endurance / (self.player.max_endurance / 100)
+            if self.player.endurance > 0:
+                pygame.draw.rect(self.screen, (0, 150, 200), (Viewer.width-215, 81, int(ed*2), 19))
+
+            if self.player.hitpoints <= 0:
+                self.player.hitpoints = 0
+            elif self.player.hitpoints >= self.player.max_hitpoints:
+                self.player.hitpoints = 50
+
+
+            self.flytextgroup.update(seconds)
+
+            # --------- collision detection between target and Explosion -----
+            #for e in self.explosiongroup:
+            #    crashgroup = pygame.sprite.spritecollide(e, self.targetgroup,
+            #                 False, pygame.sprite.collide_circle)
+            #    for t in crashgroup:
+            #        t.hitpoints -= e.damage
+            #        if random.random() < 0.5:
+            #            Fire(pos = t.pos, max_age=3, bossnumber=t.number)
+
+
+            # ----------- clear, draw , update, flip -----------------
+            self.allgroup.draw(self.screen)
+
+            # -------- next frame -------------
+            pygame.display.flip()
+        ### battle over ####
+        return 0
+        
+        
     def run(self):
         """The mainloop"""
         running = True
@@ -1085,7 +1226,7 @@ class PygView(object):
                     if event.key == pygame.K_LESS:
                         for s in self.stairgroup:
                             if s.pos.x == self.player.pos.x and s.pos.y == self.player.pos.y:
-                                #PygView.numbers = {}
+                                #Viewer.numbers = {}
                                 for tile in self.tilegroup:
                                     tile.kill()
                                 self.player.endurance = self.player.max_endurance
@@ -1112,12 +1253,12 @@ class PygView(object):
             # delete everything on screen
             self.screen.blit(self.background, (0, 0))
             # ganzes kasterl
-            pygame.draw.rect(self.screen, (255, 165, 0), (PygView.width-230, 0, 230, PygView.height))
+            pygame.draw.rect(self.screen, (255, 165, 0), (Viewer.width-230, 0, 230, Viewer.height))
             # oberes hp kasterl
-            pygame.draw.rect(self.screen, (133, 11, 133), (PygView.width-215, 20, 200, 30), 10)
+            pygame.draw.rect(self.screen, (133, 11, 133), (Viewer.width-215, 20, 200, 30), 10)
             # unteres endurance rect
-            pygame.draw.rect(self.screen, (133, 11, 133), (PygView.width-215, 75, 200, 30), 10)
-            write(self.screen, "HP: {}/{}".format(self.player.phitpoints, self.player.max_phitpoints), 1315, 200, (255, 0, 0), 20, True)
+            pygame.draw.rect(self.screen, (133, 11, 133), (Viewer.width-215, 75, 200, 30), 10)
+            write(self.screen, "HP: {}/{}".format(self.player.hitpoints, self.player.max_hitpoints), 1315, 200, (255, 0, 0), 20, True)
             write(self.screen, "Endurance: {}/{}".format(self.player.endurance, self.player.max_endurance), 1315, 225, (255, 0, 0), 20, True)
             write(self.screen, "Coins: {}".format(self.player.coins), 1315, 250, (255, 0, 0), 20, True)
             write(self.screen, "FPS: {:6.3}".format(self.clock.get_fps()), 1315, 275, (255, 0, 0), 20, True)
@@ -1139,20 +1280,20 @@ class PygView(object):
                 write(self.screen, "Costs: {}.".format(price), 1315, 500, (255, 0, 0), 20, True)
                 write(self.screen, "Press B", 1315, 525, (255, 0, 0), 20, True)
                 write(self.screen, "to [b]uy!", 1315, 550, (255, 0, 0), 20, True)
-            # hp = self.player.phitpoints
-            # hpfull = self.player.max_phitpoints
-            hp = self.player.phitpoints / ( self.player.max_phitpoints / 100)
+            # hp = self.player.hitpoints
+            # hpfull = self.player.max_hitpoints
+            hp = self.player.hitpoints / ( self.player.max_hitpoints / 100)
             #50 / ( 50 / 100)
-            if self.player.phitpoints > 0:
-                pygame.draw.rect(self.screen, (0, 255, 0), (PygView.width-215, 26, int(hp*2), 19))
+            if self.player.hitpoints > 0:
+                pygame.draw.rect(self.screen, (0, 255, 0), (Viewer.width-215, 26, int(hp*2), 19))
             ed = self.player.endurance / (self.player.max_endurance / 100)
             if self.player.endurance > 0:
-                pygame.draw.rect(self.screen, (0, 150, 200), (PygView.width-215, 81, int(ed*2), 19))
+                pygame.draw.rect(self.screen, (0, 150, 200), (Viewer.width-215, 81, int(ed*2), 19))
 
-            if self.player.phitpoints <= 0:
-                self.player.phitpoints = 0
-            elif self.player.phitpoints >= self.player.max_phitpoints:
-                self.player.phitpoints = 50
+            if self.player.hitpoints <= 0:
+                self.player.hitpoints = 0
+            elif self.player.hitpoints >= self.player.max_hitpoints:
+                self.player.hitpoints = 50
 
 
             self.allgroup.update(seconds)
@@ -1198,7 +1339,50 @@ class PygView(object):
                         #else:
                         #    m.pos += pygame.math.Vector2(dx, dy)
                     # move the monster
-                    m.pos += pygame.math.Vector2(dx, dy)
+                    # moving into player?
+                    if m.pos + pygame.math.Vector2(dx, dy) == self.player.pos:
+                        Flytext(x=m.pos.x, y=-m.pos.y, text="attacking player")
+                        bonustime = self.battlerun(m)
+                        if bonustime == 0:
+                            self.player.hitpoints -= m.damage
+                        damage = bonustime * self.player.multiplicant
+                        m.hitpoints -= damage
+                        # TODO: Fight-System
+                        return
+                    
+                    # 1 monster moving into 2 monster
+                    myclass = m.__class__.__name__ 
+                    for m2 in self.monstergroup:
+                        if m2.number == m.number:
+                            continue
+                        if m.pos + pygame.math.Vector2(dx, dy) == m2.pos:
+                            #collision
+                            otherclass = m2.__class__.__name__
+                            if myclass == "Monster1" and otherclass == "Monster1":
+                                Monster2(pos=pygame.math.Vector2(m.pos + pygame.math.Vector2(dx, dy)))
+                                Flytext(x=m2.pos.x, y=-m.pos.y, text="merging")
+                                m.hitpoints = 0
+                                m2.hitpoints = 0
+                                break
+                            elif myclass == "Monster2" and otherclass == "Monster2":
+                                Monster3(pos=pygame.math.Vector2(m.pos + pygame.math.Vector2(dx, dy)))
+                                Flytext(x=m2.pos.x, y=-m.pos.y, text="merging")
+                                m.hitpoints = 0
+                                m2.hitpoints = 0
+                                break
+                            elif myclass == "Monster3" and otherclass == "Monster3":
+                                Monster4(pos=pygame.math.Vector2(m.pos + pygame.math.Vector2(dx, dy)))
+                                Flytext(x=m2.pos.x, y=-m.pos.y, text="merging")
+                                m.hitpoints = 0
+                                m2.hitpoints = 0
+                                break
+                            # 1 v 2 oder sonstige
+                            break
+                        #else:
+                    # no collision, move please
+                    else:
+                        m.pos += pygame.math.Vector2(dx, dy)
+                    
     
 if __name__ == '__main__':
-    PygView(1430,800).run() # try PygView(800,600).run()
+    Viewer(1430,800).run() # try Viewer(800,600).run()
