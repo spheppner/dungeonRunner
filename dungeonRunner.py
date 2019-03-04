@@ -630,6 +630,9 @@ class Viewer(object):
         self.inventory = []
         self.onbuyitem = False
         self.level = 0
+        self.showing = False
+        self.y = 475
+        self.y2 = 500
         # ------ background images ------
         self.backgroundfilenames = [] # every .jpg file in folder 'data'
         try:
@@ -788,14 +791,18 @@ class Viewer(object):
         #Flytext(Viewer.width/2, Viewer.height/2,  "@", color=(255,0,0), duration = 3, fontsize=20)
 
     def battlerun(self, opponent):
-           
+        self.showing = False
         e = opponent.__class__.__name__
         v = int(e[-1])
         #if v == 1:
         a = random.randint(2,10)
         b = random.randint(2,10)
         c = a * b
-        Flytext(1315, 450, "? {} x {} ?".format(a,b), duration = 10, fontsize=30, color=(0,0,200), dy=0)
+        if self.showing != True:
+            text = Flytext(1315, 450, "? {} x {} ?".format(a,b), duration = 10, fontsize=30, color=(0,0,200), dy=0)
+            self.showing = True
+        else:
+            return
         running = True
         self.battleage = 0
         self.battle_max_time = 10
@@ -841,9 +848,12 @@ class Viewer(object):
             if self.answer != "":
                 #answer = int(self.answer)
                 if int(self.answer) == c:
-                    Flytext(1315, 475, "Correct!", duration = 3, fontsize=30, color=(0,0,200), dy=0)
-                    Flytext(1315, 500, "Answer: {}".format(c), duration = 3, fontsize=30, color=(0,0,200), dy=0)
+
+                    Flytext(1315, self.y, "Correct!", duration = 3, fontsize=30, color=(0,0,200), dy=0)
+                    Flytext(1315, self.y2, "Answer: {}".format(c), duration = 3, fontsize=30, color=(0,0,200), dy=0)
                     running = False
+                    self.showing = False
+                    text.kill()
                     # how fast did the player answered...how much time is left
                     return self.battle_max_time - self.battleage
             # delete everything on screen
@@ -990,14 +1000,15 @@ class Viewer(object):
                             #---battle? --
                             for m in self.monstergroup:
                                 if self.player.pos == m.pos:
-                                    dx, dy = 0, 0
-                                    # do not move into monster
-                                    result = self.battlerun(m)
-                                    if result == 0:
-                                        self.player.hitpoints -= m.damage
-                                    damage = result * self.player.multiplicant
-                                    m.hitpoints -= damage    
-                                    break                           
+                                    if self.showing != True:
+                                        dx, dy = 0, 0
+                                        # do not move into monster
+                                        result = self.battlerun(m)
+                                        if result == 0:
+                                            self.player.hitpoints -= m.damage
+                                        damage = result * self.player.multiplicant
+                                        m.hitpoints -= damage    
+                                        break                           
                             # -------------
                             for s in self.shopgroup:
                                 if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
@@ -1078,14 +1089,15 @@ class Viewer(object):
                             
                             for m in self.monstergroup:
                                 if self.player.pos == m.pos:
-                                    dx, dy = 0, 0
-                                    # do not move into monster
-                                    result = self.battlerun(m)
-                                    if result == 0:
-                                        self.player.hitpoints -= m.damage
-                                    damage = result * self.player.multiplicant
-                                    m.hitpoints -= damage    
-                                    break
+                                    if self.showing != True:
+                                        dx, dy = 0, 0
+                                        # do not move into monster
+                                        result = self.battlerun(m)
+                                        if result == 0:
+                                            self.player.hitpoints -= m.damage
+                                        damage = result * self.player.multiplicant
+                                        m.hitpoints -= damage    
+                                        break
                             
                             for s in self.shopgroup:
                                 if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
@@ -1168,14 +1180,15 @@ class Viewer(object):
                             
                             for m in self.monstergroup:
                                 if self.player.pos == m.pos:
-                                    dx, dy = 0, 0
-                                    # do not move into monster
-                                    result = self.battlerun(m)
-                                    if result == 0:
-                                        self.player.hitpoints -= m.damage
-                                    damage = result * self.player.multiplicant
-                                    m.hitpoints -= damage    
-                                    break
+                                    if self.showing != True:
+                                        dx, dy = 0, 0
+                                        # do not move into monster
+                                        result = self.battlerun(m)
+                                        if result == 0:
+                                            self.player.hitpoints -= m.damage
+                                        damage = result * self.player.multiplicant
+                                        m.hitpoints -= damage    
+                                        break
                             
                             for s in self.shopgroup:
                                 if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
@@ -1257,14 +1270,15 @@ class Viewer(object):
                             
                             for m in self.monstergroup:
                                 if self.player.pos == m.pos:
-                                    dx, dy = 0, 0
-                                    # do not move into monster
-                                    result = self.battlerun(m)
-                                    if result == 0:
-                                        self.player.hitpoints -= m.damage
-                                    damage = result * self.player.multiplicant
-                                    m.hitpoints -= damage    
-                                    break
+                                    if self.showing != True:
+                                        dx, dy = 0, 0
+                                        # do not move into monster
+                                        result = self.battlerun(m)
+                                        if result == 0:
+                                            self.player.hitpoints -= m.damage
+                                        damage = result * self.player.multiplicant
+                                        m.hitpoints -= damage    
+                                        break
                             
                             for s in self.shopgroup:
                                 if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
