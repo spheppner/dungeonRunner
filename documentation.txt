@@ -34,3 +34,6 @@ Damage that is dealen = left time * multiplicant variable that is defined in cla
 - License to dig Gold and get coins from it will be shown in the shop to be bought
 - Other Monsters, more Monsters will be added
 - Small Bugs will be fixed
+
+#--- Beschreibung zum Projekt (für U19 Create Your World) ---#
+Ich habe dieses Projekt am 27. November 2018 begonnen, mit der Idee ein rogue-like Spiel für die Ars Electronica zu schreiben. Am Anfang bestand das Spiel nur aus Zeichen wo man mit einem @ in einem Labyrinth, welches zufällig generiert wurde und zweidimensional angezeigt wurde, herumgelaufen ist. Dann habe ich noch ein Programm geschrieben, welches das Labyrinth einliest und dann als Graphik anzeigt. Z.B. wäre dann eine Mauer ein grünes Viereck und ein Boden einfach weiss. Das Spiel wird zwar nur zweidimensional angezeigt, doch eigentlich hat es drei Dimensionen, denn man kann Treppen die am Boden liegen hinunterlaufen und somit auf eine neue Ebene kommen. Derzeit hat das Spiel noch nicht wirklich ein Ziel, außer, dass man auf die 15. Ebene gelangen muss damit man gewinnt. Trotzdem habe ich sehr viel Mühe in das Spiel gesteckt. Noch einmal ein dickes Dankeschön an meinen Programmierlehrer von spielend-programmieren, dass er mir so viel über das Programmieren in Python beigebracht hat.
