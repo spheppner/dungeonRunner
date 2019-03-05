@@ -266,9 +266,10 @@ class Player(VectorSprite):
         self.max_hitpoints = 50
         self.endurance = 100
         self.max_endurance = 100
-        self.coins = 0
+        self.coins = 25
         self.multiplicant = 3
         self.character = "@"
+        self.inventory = []
 
     def create_image(self):
         self.fontsize = 32
@@ -421,7 +422,7 @@ class GoldLicense(VectorSprite):
     def _overwrite_parameters(self):
         self._layer = -5
         self.item_name = "Goldmining License"
-        self.item_price = random.randint(15, 45)
+        self.item_price = random.randint(5, 15)
 
     def create_image(self):
         self.fontsize = 32
@@ -432,7 +433,73 @@ class GoldLicense(VectorSprite):
         self.image.convert_alpha()
         self.image0 = self.image.copy()
         self.rect = self.image.get_rect()
+    
+    def get_item_price(self):
+        return self.item_price
+    def get_item_name(self):
+        return self.item_name
+        
+class Upgrade1(VectorSprite):
+    
+    def _overwrite_parameters(self):
+        self._layer = -5
+        self.item_name = "Damage Upgrade"
+        self.item_price = random.randint(10, 20)
 
+    def create_image(self):
+        self.fontsize = 32
+        self.color = (255, 127, 0)
+        self.text = self.item_name[0]
+        self.image = make_text(self.text, self.color, self.fontsize)
+        self.image.set_colorkey((0, 0, 0))
+        self.image.convert_alpha()
+        self.image0 = self.image.copy()
+        self.rect = self.image.get_rect()
+    
+    def get_item_price(self):
+        return self.item_price
+    def get_item_name(self):
+        return self.item_name
+
+class Upgrade2(VectorSprite):
+    
+    def _overwrite_parameters(self):
+        self._layer = -5
+        self.item_name = "HP Upgrade"
+        self.item_price = random.randint(10, 20)
+
+    def create_image(self):
+        self.fontsize = 32
+        self.color = (255, 127, 0)
+        self.text = self.item_name[0]
+        self.image = make_text(self.text, self.color, self.fontsize)
+        self.image.set_colorkey((0, 0, 0))
+        self.image.convert_alpha()
+        self.image0 = self.image.copy()
+        self.rect = self.image.get_rect()
+    
+    def get_item_price(self):
+        return self.item_price
+    def get_item_name(self):
+        return self.item_name
+
+class Healing(VectorSprite):
+    
+    def _overwrite_parameters(self):
+        self._layer = -5
+        self.item_name = "Healing"
+        self.item_price = random.randint(1, 5)
+
+    def create_image(self):
+        self.fontsize = 32
+        self.color = (255, 127, 0)
+        self.text = self.item_name[0]
+        self.image = make_text(self.text, self.color, self.fontsize)
+        self.image.set_colorkey((0, 0, 0))
+        self.image.convert_alpha()
+        self.image0 = self.image.copy()
+        self.rect = self.image.get_rect()
+    
     def get_item_price(self):
         return self.item_price
     def get_item_name(self):
@@ -610,6 +677,8 @@ class Rocket(VectorSprite):
 class Viewer(object):
     width = 0
     height = 0
+    menuitems = ["play", "credits", "quit"]
+    cursorindex = 0
 
     def __init__(self, width=640, height=400, fps=30):
         """Initialize pygame, window, background, font,...
@@ -626,8 +695,7 @@ class Viewer(object):
         self.onshop = False
         self.onexitchar = False
         self.fstart = True
-        self.item_list = ["Goldmining License", "Nothing"]
-        self.inventory = []
+        self.item_list = ["Goldmining License", "Damage Upgrade", "HP Upgrade", "Healing", "Nothing"]
         self.onbuyitem = False
         self.level = 0
         self.showing = False
@@ -659,6 +727,7 @@ class Viewer(object):
         self.paint()
         self.loadbackground()
         self.loadlevel()
+        self.menu_visited = False
 
     def loadlevel(self, shop=False):
         self.shopActive = shop
@@ -717,6 +786,12 @@ class Viewer(object):
                         pass
                     elif n == 2:
                         GoldLicense(pos=p)
+                    elif n == 3:
+                        Upgrade1(pos=p)
+                    elif n == 4:
+                        Upgrade2(pos=p)
+                    elif n == 5:
+                        Healing(pos=p)
                 elif char == "e":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     ExitChar(pos=p)
@@ -767,6 +842,7 @@ class Viewer(object):
         self.buyablegroup = pygame.sprite.Group()
         self.monstergroup = pygame.sprite.Group()
         self.flytextgroup = pygame.sprite.Group()
+        
         VectorSprite.groups = self.allgroup
         Flytext.groups = self.allgroup, self.flytextgroup
         Explosion.groups= self.allgroup, self.explosiongroup
@@ -781,6 +857,9 @@ class Viewer(object):
         Grid.groups = self.allgroup, self.tilegroup, self.floorgroup
         ExitChar.groups = self.allgroup, self.tilegroup, self.exitchargroup
         GoldLicense.groups = self.allgroup, self.tilegroup, self.buyablegroup
+        Upgrade1.groups = self.allgroup, self.tilegroup, self.buyablegroup
+        Upgrade2.groups = self.allgroup, self.tilegroup, self.buyablegroup
+        Healing.groups = self.allgroup, self.tilegroup, self.buyablegroup
         Monster.groups = self.allgroup, self.tilegroup, self.monstergroup
         Monster1.groups = self.allgroup, self.tilegroup, self.monstergroup
         Monster2.groups = self.allgroup, self.tilegroup, self.monstergroup
@@ -848,9 +927,8 @@ class Viewer(object):
             if self.answer != "":
                 #answer = int(self.answer)
                 if int(self.answer) == c:
-
-                    Flytext(1315, self.y, "Correct!", duration = 3, fontsize=30, color=(0,0,200), dy=0)
-                    Flytext(1315, self.y2, "Answer: {}".format(c), duration = 3, fontsize=30, color=(0,0,200), dy=0)
+                    text1 = Flytext(1315, self.y, "Correct!", duration = 1.5, fontsize=30, color=(0,0,200), dy=0)
+                    text2 = Flytext(1315, self.y2, "Answer: {}".format(c), duration = 1.5, fontsize=30, color=(0,0,200), dy=0)
                     running = False
                     self.showing = False
                     text.kill()
@@ -874,7 +952,8 @@ class Viewer(object):
             ed = self.player.endurance / (self.player.max_endurance / 100)
             if self.player.endurance > 0:
                 pygame.draw.rect(self.screen, (0, 150, 200), (Viewer.width-215, 81, int(ed*2), 19))
-
+            bt = self.battleage / (self.battle_max_time / 100)
+            pygame.draw.rect(self.screen, (200,0,200), (Viewer.width-215, 120, int(bt*2), 19)) 
             if self.player.hitpoints <= 0:
                 self.player.hitpoints = 0
             elif self.player.hitpoints >= self.player.max_hitpoints:
@@ -883,6 +962,65 @@ class Viewer(object):
 
             self.flytextgroup.update(seconds)
 
+            # --------- collision detection between target and Explosion -----
+            #for e in self.explosiongroup:
+            #    crashgroup = pygame.sprite.spritecollide(e, self.targetgroup,
+            #                 False, pygame.sprite.collide_circle)
+            #    for t in crashgroup:
+            #        t.hitpoints -= e.damage
+            #        if random.random() < 0.5:
+            #            Fire(pos = t.pos, max_age=3, bossnumber=t.number)
+
+
+            # ----------- clear, draw , update, flip -----------------
+            self.allgroup.draw(self.screen)
+
+            # -------- next frame -------------
+            pygame.display.flip()
+        ### battle over ####
+        return 0
+    
+    def menurun(self):
+        running = True
+        while running:
+            
+            pressed_keys = pygame.key.get_pressed()
+            milliseconds = self.clock.tick(self.fps) #
+            seconds = milliseconds / 1000
+            # -------- events ------
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                # ------- pressed and released key ------
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        return
+                    if event.key == pygame.K_UP:
+                        Viewer.cursorindex -= 1
+                        if Viewer.cursorindex <= 0:
+                            Viewer.cursorindex = 0
+                    if event.key == pygame.K_DOWN:
+                        Viewer.cursorindex += 1
+                        if Viewer.cursorindex >= len(Viewer.menuitems):
+                            Viewer.cursorindex = len(Viewer.menuitems)-1
+                    if event.key == pygame.K_RETURN:
+                        activeitem = Viewer.menuitems[Viewer.cursorindex]
+                        if activeitem == "play":
+                            return
+                        elif activeitem == "quit":
+                            pygame.quit()
+                            
+            # delete everything on screen
+            self.screen.blit(self.background, (0, 0))
+            self.flytextgroup.update(seconds)
+            
+            # draw menuitems
+            for y, i in enumerate(Viewer.menuitems):
+                write(self.screen, i, 1280, 100+y*20, color=(0,0,200))
+            # draw cursor
+            write(self.screen, "-->", 1225, 100+Viewer.cursorindex*20, color=(0,0,random.randint(200,255)))
+                
+            
             # --------- collision detection between target and Explosion -----
             #for e in self.explosiongroup:
             #    crashgroup = pygame.sprite.spritecollide(e, self.targetgroup,
@@ -910,6 +1048,8 @@ class Viewer(object):
         self.snipertarget = None
         gameOver = False
         exittime = 0
+        if not self.menu_visited:
+            self.menurun()
         while running:
             #print(pygame.key.get_mods())
             pressed_keys = pygame.key.get_pressed()
@@ -928,6 +1068,8 @@ class Viewer(object):
                     running = False
                 # ------- pressed and released key ------
                 elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_m:
+                        self.menurun()
                     if event.key == pygame.K_ESCAPE:
                         running = False
                     #=============================================
@@ -1314,7 +1456,7 @@ class Viewer(object):
                                     f.write("a\n")
                                 self.loadlevel()
                     if event.key == pygame.K_RETURN:
-                        if self.onshop is True:
+                        if self.onshop is True and self.shopActive is False:
                             with open("shop_pos.txt", "w") as f:
                                 for s in self.shopgroup:
                                     f.write(str(s.pos.x) + "," + str(s.pos.y))
@@ -1328,6 +1470,30 @@ class Viewer(object):
                             for tile in self.tilegroup:
                                 tile.kill()
                             self.loadlevel()
+                    if event.key == pygame.K_b:
+                        if self.onbuyitem is True:
+                            for b in self.buyablegroup:
+                                if b.pos == self.player.pos:
+                                    if b.item_name not in self.player.inventory:
+                                        if self.player.coins >= b.item_price:
+                                            if b.item_name == "Damage Upgrade":
+                                                self.player.multiplicant += 1.5
+                                            elif b.item_name == "HP Upgrade":
+                                                self.player.max_hitpoints += 20
+                                                self.player.hitpoints += 10
+                                            elif b.item_name == "Healing":
+                                                self.player.hitpoints += 20
+                                            self.player.coins -= b.item_price
+                                            self.player.inventory.append(b.item_name)
+                                            b.kill()
+                                            self.onbuyitem = False
+                                        else:
+                                            Flytext(1315, 575, "Not enough", duration = 1.5, fontsize=30, color=(0,0,200), dy=0)
+                                            Flytext(1315, 600, "coins!", duration = 1.5, fontsize=30, color=(0,0,200), dy=0)
+                                    else:
+                                        Flytext(1315, 575, "You already", duration = 1.5, fontsize=30, color=(0,0,200), dy=0)
+                                        Flytext(1315, 600, "bought this!", duration = 1.5, fontsize=30, color=(0,0,200), dy=0)
+                                        
             
             # delete everything on screen
             self.screen.blit(self.background, (0, 0))
@@ -1339,8 +1505,10 @@ class Viewer(object):
             pygame.draw.rect(self.screen, (133, 11, 133), (Viewer.width-215, 75, 200, 30), 10)
             write(self.screen, "HP: {}/{}".format(self.player.hitpoints, self.player.max_hitpoints), 1315, 200, (255, 0, 0), 20, True)
             write(self.screen, "Endurance: {}/{}".format(self.player.endurance, self.player.max_endurance), 1315, 225, (255, 0, 0), 20, True)
-            write(self.screen, "Coins: {}".format(self.player.coins), 1315, 250, (255, 0, 0), 20, True)
-            write(self.screen, "FPS: {:6.3}".format(self.clock.get_fps()), 1315, 275, (255, 0, 0), 20, True)
+            write(self.screen, "Multiplicant: {}".format(self.player.multiplicant), 1315, 250, (255, 0, 0), 20, True)
+            write(self.screen, "Coins: {}".format(self.player.coins), 1315, 275, (255, 0, 0), 20, True)
+            write(self.screen, "Level: {}".format(self.level), 1315, 300, (255, 0, 0), 20, True)
+            write(self.screen, "FPS: {:6.3}".format(self.clock.get_fps()), 1315, 325, (255, 0, 0), 20, True)
             if self.onshop is True and self.shopActive is False:
                 write(self.screen, "Standing on SHOP.", 1315, 450, (255, 0, 0), 20, True)
                 write(self.screen, "Press ENTER", 1315, 475, (255, 0, 0), 20, True)
@@ -1372,7 +1540,7 @@ class Viewer(object):
             if self.player.hitpoints <= 0:
                 self.player.hitpoints = 0
             elif self.player.hitpoints >= self.player.max_hitpoints:
-                self.player.hitpoints = 50
+                self.player.hitpoints = self.player.max_hitpoints
 
 
             self.allgroup.update(seconds)
@@ -1426,6 +1594,8 @@ class Viewer(object):
                             self.player.hitpoints -= m.damage
                         damage = bonustime * self.player.multiplicant
                         m.hitpoints -= damage
+                        if m.hitpoints <= 0:
+                            self.player.coins += random.randint(1, 10)
                         # TODO: Fight-System
                         return
                     
