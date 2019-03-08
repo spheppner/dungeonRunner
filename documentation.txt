@@ -28,13 +28,6 @@ Option 2: If the player engages the fight, he must end the fight or die in it, b
 If fight is engaged player needs to enter the answer to a multiplication that is randomly generated and shown in the lower left corner. Player has ten seconds to answer
 Damage that is dealen = left time * multiplicant variable that is defined in class of Player()
 
--- What will follow -- (after U19 Create Your World Competition)
-- Working Shop
-- Damage-Multiplicant of Player will be shown in the shop to be bought
-- License to dig Gold and get coins from it will be shown in the shop to be bought
-- Other Monsters, more Monsters will be added
-- Small Bugs will be fixed
-
 #--- Beschreibung zum Projekt (für U19 Create Your World) ---#
 Vor zwei Jahren habe ich noch mit den Einfachsten Befehlen in HTML eine Webseite programmiert und nun bin ich, seit ich den Programmierkurs spielend-programmieren besuche, auf Python "spezialisiert". Ich habe auch vor zwei Jahren mit einer meiner ersten Webseiten hier an diesem Wettbewerb schon teilgenommen und ich freue mich dieses Jahr noch einmal teilnehmen zu können.
 
