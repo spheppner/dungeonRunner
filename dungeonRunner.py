@@ -391,6 +391,19 @@ class Wall(VectorSprite):
         self.image.convert_alpha()
         self.rect = self.image.get_rect()
 
+class SecretWall(VectorSprite):
+
+    def _overwrite_parameters(self):
+        self._layer = 5
+
+    def create_image(self):
+        self.image = pygame.Surface((20, 20))
+        self.image.fill((0, 255, 0))
+        pygame.draw.rect(self.image, (255,0,255), (0,0, 19,19),1)
+        self.image.set_colorkey((0,0,0))
+        self.image.convert_alpha()
+        self.rect = self.image.get_rect()
+
 class Srock(VectorSprite):
     def _overwrite_parameters(self):
         self._layer = 5
@@ -415,6 +428,18 @@ class Coin(VectorSprite):
         self.image.set_colorkey((0, 0, 0))
         self.image.convert_alpha()
         self.image0 = self.image.copy()
+        self.rect = self.image.get_rect()
+        
+class SecretCoin(VectorSprite):
+    def _overwrite_parameters(self):
+        self._layer = 5
+
+    def create_image(self):
+        self.image = pygame.Surface((20, 20))
+        self.image.fill((0, 255, 0))
+        pygame.draw.rect(self.image, (255,0,255), (0,0, 19,19),1)
+        self.image.set_colorkey((0,0,0))
+        self.image.convert_alpha()
         self.rect = self.image.get_rect()
 
 class GoldLicense(VectorSprite):
@@ -807,7 +832,12 @@ class Viewer(object):
                 elif char == "4":
                     p = pygame.math.Vector2(x * 20+10, -y*20-10)
                     Monster4(pos=p)
-
+                elif char == "J":
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
+                    SecretWall(pos=p)
+                elif char == "O":
+                    p = pygame.math.Vector2(x * 20+10, -y*20-10)
+                    SecretCoin(pos=p)
 
     def loadbackground(self):
 
@@ -841,6 +871,8 @@ class Viewer(object):
         self.buyablegroup = pygame.sprite.Group()
         self.monstergroup = pygame.sprite.Group()
         self.flytextgroup = pygame.sprite.Group()
+        self.secretwallgroup = pygame.sprite.Group()
+        self.secretcoingroup = pygame.sprite.Group()
         
         VectorSprite.groups = self.allgroup
         Flytext.groups = self.allgroup, self.flytextgroup
@@ -864,6 +896,8 @@ class Viewer(object):
         Monster2.groups = self.allgroup, self.tilegroup, self.monstergroup
         Monster3.groups = self.allgroup, self.tilegroup, self.monstergroup
         Monster4.groups = self.allgroup, self.tilegroup, self.monstergroup
+        SecretWall.groups = self.allgroup, self.tilegroup, self.secretwallgroup, self.nogogroup, self.digablegroup
+        SecretCoin.groups = self.allgroup, self.tilegroup, self.secretcoingroup, self.coingroup
 
         self.player = Player(pos = pygame.math.Vector2(100,-100))
         #Flytext(Viewer.width/2, Viewer.height/2,  "@", color=(255,0,0), duration = 3, fontsize=20)
@@ -1116,6 +1150,20 @@ class Viewer(object):
                                 
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
+                                for v in self.secretwallgroup:
+                                    if v.pos.x == x and v.pos.y == y:
+                                        for s in self.secretcoingroup:
+                                            if random.random() < 0.1:
+                                                Monster4(pos=s.pos)
+                                            else:
+                                                Coin(pos=s.pos)
+                                            for v in self.secretwallgroup:
+                                                if v.pos.x == x and v.pos.y == y:
+                                                    v.kill()
+                                                else:
+                                                    Srock(pos=v.pos)
+                                                    v.kill()
+                                            s.kill()
                                 if d.pos.x == x and d.pos.y == y:
                                     if self.player.endurance > 0:
                                         print("buddle nach rechts")
@@ -1206,6 +1254,17 @@ class Viewer(object):
                                 self.onbuyitem = True
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
+                                for v in self.secretwallgroup:
+                                    if v.pos.x == x and v.pos.y == y:
+                                        for s in self.secretcoingroup:
+                                            Coin(pos=s.pos)
+                                            for v in self.secretwallgroup:
+                                                if v.pos.x == x and v.pos.y == y:
+                                                    v.kill()
+                                                else:
+                                                    Srock(pos=v.pos)
+                                                    v.kill()
+                                            s.kill()
                                 if d.pos.x == x and d.pos.y == y:
                                     if self.player.endurance > 0:
                                         print("buddle nach links")
@@ -1297,6 +1356,17 @@ class Viewer(object):
                                 self.onbuyitem = True
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
+                                for v in self.secretwallgroup:
+                                    if v.pos.x == x and v.pos.y == y:
+                                        for s in self.secretcoingroup:
+                                            Coin(pos=s.pos)
+                                            for v in self.secretwallgroup:
+                                                if v.pos.x == x and v.pos.y == y:
+                                                    v.kill()
+                                                else:
+                                                    Srock(pos=v.pos)
+                                                    v.kill()
+                                            s.kill()
                                 if d.pos.x == x and d.pos.y == y:
                                     if self.player.endurance > 0:
                                         print("buddle nach oben")
@@ -1387,6 +1457,17 @@ class Viewer(object):
                                 self.onbuyitem = True
                         if pressed_keys[pygame.K_LSHIFT]:
                             for d in self.digablegroup:
+                                for v in self.secretwallgroup:
+                                    if v.pos.x == x and v.pos.y == y:
+                                        for s in self.secretcoingroup:
+                                            Coin(pos=s.pos)
+                                            for v in self.secretwallgroup:
+                                                if v.pos.x == x and v.pos.y == y:
+                                                    v.kill()
+                                                else:
+                                                    Srock(pos=v.pos)
+                                                    v.kill()
+                                            s.kill()
                                 if d.pos.x == x and d.pos.y == y:
                                     if self.player.endurance > 0:
                                         print("buddle nach unten")
