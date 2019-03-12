@@ -838,7 +838,6 @@ class Viewer(object):
         self.floorgroup = pygame.sprite.Group()
         self.exitchargroup = pygame.sprite.Group()
         self.pickupgroup = pygame.sprite.Group()
-        self.mineablegroup = pygame.sprite.Group()
         self.buyablegroup = pygame.sprite.Group()
         self.monstergroup = pygame.sprite.Group()
         self.flytextgroup = pygame.sprite.Group()
@@ -849,7 +848,7 @@ class Viewer(object):
         Wall.groups = self.allgroup, self.tilegroup, self.nogogroup, self.digablegroup
         Coin.groups = self.allgroup, self.tilegroup, self.coingroup
         Srock.groups = self.allgroup, self.tilegroup, self.nogogroup
-        Goldrock.groups = self.allgroup, self.tilegroup, self.nogogroup, self.mineablegroup
+        Goldrock.groups = self.allgroup, self.tilegroup, self.nogogroup, self.digablegroup
         StairDown.groups = self.allgroup, self.tilegroup, self.stairgroup
         Player.groups = self.allgroup, self.playergroup
         Spark.groups = self.allgroup
@@ -873,9 +872,19 @@ class Viewer(object):
         self.showing = False
         e = opponent.__class__.__name__
         v = int(e[-1])
-        #if v == 1:
-        a = random.randint(2,10)
-        b = random.randint(2,10)
+        if v == 1:
+            a = random.randint(5, 13)
+            self.battle_max_time = 10
+        elif v == 2:
+            a = random.randint(7, 10)
+            self.battle_max_time = 7
+        elif v == 3:
+            a = random.randint(4, 10)
+            self.battle_max_time = 6
+        elif v == 4:
+            a = random.randint(1, 10)
+            self.battle_max_time = 4
+        b = random.randint(3,10)
         c = a * b
         if self.showing != True:
             text = Flytext(1315, 450, "? {} x {} ?".format(a,b), duration = 10, fontsize=30, color=(0,0,200), dy=0)
@@ -884,7 +893,6 @@ class Viewer(object):
             return
         running = True
         self.battleage = 0
-        self.battle_max_time = 10
         self.answer = ""
         while running:
             
@@ -942,6 +950,9 @@ class Viewer(object):
             pygame.draw.rect(self.screen, (133, 11, 133), (Viewer.width-215, 20, 200, 30), 10)
             # unteres endurance rect
             pygame.draw.rect(self.screen, (133, 11, 133), (Viewer.width-215, 75, 200, 30), 10)
+            
+            pygame.draw.rect(self.screen, (133, 11, 133), (Viewer.width-215, 130, 200, 30), 10)
+            
             write(self.screen, "HP: {}/{}".format(self.player.hitpoints, self.player.max_hitpoints), 1315, 200, (255, 0, 0), 20, True)
             write(self.screen, "Endurance: {}/{}".format(self.player.endurance, self.player.max_endurance), 1315, 225, (255, 0, 0), 20, True)
             write(self.screen, "Coins: {}".format(self.player.coins), 1315, 250, (255, 0, 0), 20, True)
@@ -953,7 +964,7 @@ class Viewer(object):
             if self.player.endurance > 0:
                 pygame.draw.rect(self.screen, (0, 150, 200), (Viewer.width-215, 81, int(ed*2), 19))
             bt = self.battleage / (self.battle_max_time / 100)
-            pygame.draw.rect(self.screen, (200,0,200), (Viewer.width-215, 120, int(bt*2), 19)) 
+            pygame.draw.rect(self.screen, (200,0,200), (Viewer.width-215, 136, int(bt*2), 19)) 
             if self.player.hitpoints <= 0:
                 self.player.hitpoints = 0
             elif self.player.hitpoints >= self.player.max_hitpoints:
@@ -1503,6 +1514,9 @@ class Viewer(object):
             pygame.draw.rect(self.screen, (133, 11, 133), (Viewer.width-215, 20, 200, 30), 10)
             # unteres endurance rect
             pygame.draw.rect(self.screen, (133, 11, 133), (Viewer.width-215, 75, 200, 30), 10)
+            
+            
+            
             write(self.screen, "HP: {}/{}".format(self.player.hitpoints, self.player.max_hitpoints), 1315, 200, (255, 0, 0), 20, True)
             write(self.screen, "Endurance: {}/{}".format(self.player.endurance, self.player.max_endurance), 1315, 225, (255, 0, 0), 20, True)
             write(self.screen, "Multiplicant: {}".format(self.player.multiplicant), 1315, 250, (255, 0, 0), 20, True)
