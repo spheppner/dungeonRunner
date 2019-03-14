@@ -53,7 +53,15 @@ def start():
               "S": {"name": "Shop",
                     "prob": 0.3,
                     "max": 1,
-                    "character": "S"}
+                    "character": "S"},
+              "J": {"name": "Invisible Wall",
+                    "prob": None,
+                    "max": None,
+                    "character": "J"},
+              "O": {"name": "Invisible Coin",
+                    "prob": None,
+                    "max": None,
+                    "character": "O"}
               }
 
     rooms = []
@@ -75,6 +83,8 @@ def start():
     maxstairsdown = legend["<"]["max"]
     maxshops = legend["S"]["max"]
     maxmonster = legend["monster"]["max"]
+    maxinvisible = legend["J"]["max"]
+    maxicoin = legend["O"]["max"]
 
     pebble_prob = legend["."]["prob"]
     coin_prob = legend["c"]["prob"]
@@ -87,6 +97,8 @@ def start():
     monster2_prob = legend["2"]["prob"]
     monster3_prob = legend["3"]["prob"]
     monster4_prob = legend["4"]["prob"]
+    invisible_prob = legend["J"]["prob"]
+    icoin_prob = legend["O"]["prob"]
 
     pebble_character = legend["."]["character"]
     coin_character = legend["c"]["character"]
@@ -100,7 +112,9 @@ def start():
     monster2_character = legend["2"]["character"]
     monster3_character = legend["3"]["character"]
     monster4_character = legend["4"]["character"]
-
+    invisible_character = legend["J"]["character"]
+    icoin_character = legend["O"]["character"]
+    
     for y, line in enumerate(range(maxlines)):
         l = []
         #if line == 0 or line == 1 or line == 2 or line == 3 or line == 4 or line == 5 or line == 6 or line == 7 or line == 8 or line == 9:
@@ -221,6 +235,9 @@ def start():
                         if rock_nr < maxrocks and y > y1 and y < y1+ h and x > x1 and x < x1+b:
                             rock_nr += 1
                             d[y][x] = rock_character
+    
+    
+
     pebbles = []
     for y, line in enumerate(d):
         for x, char in enumerate(line):
@@ -269,6 +286,34 @@ def start():
             d[y][x] = srock_character
         elif random.random() < goldrock_prob:
             d[y][x] = goldrock_character
+    
+    # secrect treasure room ?
+    for v in range(50):
+        cy = random.randint(5, maxlines-5)
+        cx = random.randint(5, maxchars-5)
+        goodcenter = True
+        for dx in (-2,-1,0,1,2):
+            for dy in (-2,-1,0,1,2):
+                if d[cy+dy][cx+dx] not in "#sg":
+                    goodcenter = False
+                    
+                    # tile is a rock
+        
+        if goodcenter:
+            # paint secret room wall
+            for dx in (-2,-1,0,1,2):
+                for dy in (-2,-1,0,1,2):
+                    if (dx == -2 and dy == -2) or (dx == -2 and dy == 2) or (dx == 2 and dy == -2) or (dx == 2 and dy == 2):
+                        pass # corner should be normal wall
+                    else:
+                        d[cy+dy][cx+dx] = invisible_character
+            # paint secrent room treasure
+            for dx in (-1,0,1):
+                for dy in (-1,0,1):
+                    d[cy+dy][cx+dx] = icoin_character
+            break
+            
+        
     
     # monsterschleifen
     
