@@ -16,8 +16,6 @@ import math
 #import textscroller_vertical as ts
 #import subprocess
 
-"""Best game: 10 waves by Ines"""
-
 def randomize_color(color, delta=50):
     d=random.randint(-delta, delta)
     color = color + d
