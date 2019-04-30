@@ -249,7 +249,7 @@ class VectorSprite(pygame.sprite.Sprite):
                     self.kill()
             if self.sticky_with_boss:
                 boss = VectorSprite.numbers[self.bossnumber]
-                #self.pos = v.Vec2d(boss.pos.x, boss.pos.y)
+                #self.pos = pygame.math.Vector2(boss.pos.x, boss.pos.y)
                 self.pos = pygame.math.Vector2(boss.pos.x, boss.pos.y)
         self.pos += self.move * seconds
         self.distance_traveled += self.move.length() * seconds
@@ -583,27 +583,6 @@ class StairDown(VectorSprite):
         self.image0 = self.image.copy()
         self.rect = self.image.get_rect()
 
-class Smoke(VectorSprite):
-
-    def create_image(self):
-        self.image = pygame.Surface((50,50))
-        pygame.draw.circle(self.image, self.color, (25,25),
-                           int(self.age*3))
-        self.image.set_colorkey((0,0,0))
-        self.image.convert_alpha()
-        self.rect = self.image.get_rect()
-
-    def update(self, seconds):
-        VectorSprite.update(self, seconds)
-        if self.gravity is not None:
-            self.move += self.gravity * seconds
-        self.create_image()
-        self.rect=self.image.get_rect()
-        self.rect.center=(self.pos.x, self.pos.y)
-        c = int(self.age * 100)
-        c = min(255,c)
-        self.color=(c,c,c)
-
 
 class Explosion():
 
@@ -627,7 +606,7 @@ class Spark(VectorSprite):
             self.gravity = pygame.math.Vector2(0, -3.7)
 
     def _overwrite_parameters(self):
-        self._layer = 8
+        self._layer = 10000000
         self.kill_on_edge = True
 
     def create_image(self):
@@ -648,55 +627,66 @@ class Spark(VectorSprite):
         VectorSprite.update(self, seconds)
         self.move += self.gravity
 
-class Rocket(VectorSprite):
-
-    def __init__(self, **kwargs):
-        self.readyToLaunchTime = 0
-        VectorSprite.__init__(self, **kwargs)
-
-        self.damage = 3
-        self.color = (255,156,0)
-        self.create_image()
-
+class Endanimation(VectorSprite):
     def _overwrite_parameters(self):
-        self._layer = 1
+        self._layer = 50000
+        #self.max_distance = Viewer.width//2
+        self.enough = False
 
     def create_image(self):
-        self.angle = 90
-        self.image = pygame.Surface((20,10))
-        pygame.draw.polygon(self.image, self.color, [(0,0),(5,0), (20,5), (5,10), (0,10), (5,5)])
+        self.image = pygame.Surface((Viewer.width//2, Viewer.height))
+        self.image.fill((170, 170, 170))
+        pygame.draw.rect(self.image, (110,110,110), (0,0, Viewer.width//2,Viewer.height),40)
+        self.image.set_colorkey((0,0,0))
+        self.image.convert_alpha()
+        self.rect = self.image.get_rect()
+        
+    def update(self, seconds):
+        VectorSprite.update(self, seconds)
+        if self.distance_traveled >= (Viewer.width / 2):
+            self.move = pygame.math.Vector2(0,0)
+            if not self.enough:
+                self.enough = True
+                for _ in range(22):
+                    Explosion(pos=pygame.math.Vector2(Viewer.width//2, -random.randint(0, Viewer.height)))
+            
+            
+        
+class Rocket(VectorSprite):
+    
+    def _overwrite_parameters(self):
+        self._layer = 1000
+        # start?
+        self.move = pygame.math.Vector2(Viewer.width // 2, Viewer.height // 2)
+        self.move.normalize_ip()
+        self.move *= 100 # speed
+        if random.random() < 0.5:
+            self.angle = 45
+            x = 0
+        else:
+            x = Viewer.width
+            self.move.x *= -1
+            self.angle = 135
+        self.pos = pygame.math.Vector2(x, -Viewer.height)
+        self.max_distance = ((Viewer.width/2) ** 2 + (Viewer.height/2) ** 2 )**0.5
+        
+    def update(self, seconds):
+        if self.distance_traveled > self.max_distance:
+            Explosion(pos=pygame.math.Vector2(self.pos.x, self.pos.y))
+        VectorSprite.update(self, seconds)
+        
+    
+    def create_image(self):
+        self.image = pygame.Surface((20, 10))
+        self.image.fill((255, 255, 0))
+        #pygame.draw.rect(self.image, (255,0,255), (0,0, 19,19),1)
         self.image.set_colorkey((0,0,0))
         self.image.convert_alpha()
         self.image0 = self.image.copy()
         self.rect = self.image.get_rect()
-        self.set_angle(self.angle)
 
-    def update(self, seconds):
-        # --- speed limit ---
-        if self.move.length() != self.speed:
-            if self.move.length() < 0:
-                self.move = self.move.normalize() * self.speed
-            else:
-                pass
-        if self.move.length() > 0:
-            self.set_angle(-self.move.angle_to(pygame.math.Vector2(-1,0)))
-            self.move = self.move.normalize() * self.speed
-            # --- Smoke ---
-            if random.random() < 0.2 and self.age > 0.1:
-                Smoke(pos=pygame.math.Vector2(self.pos.x, self.pos.y),
-                   gravity=pygame.math.Vector2(0,4), max_age = 4)
-        self.oldage = self.age
-        VectorSprite.update(self, seconds)
-        # new rockets are stored offscreen 500 pixel below Viewer.height
-        if self.age > self.readyToLaunchTime and self.oldage < self.readyToLaunchTime:
-            self.pos.y -= 500
-
-    def kill(self):
-        Explosion(pos=pygame.math.Vector2(self.pos.x, self.pos.y),max_age=2.1, color=(200,255,255), damage = self.damage)
-        VectorSprite.kill(self)
-
-
-
+        
+    
 class Viewer(object):
     width = 0
     height = 0
@@ -871,6 +861,7 @@ class Viewer(object):
         self.flytextgroup = pygame.sprite.Group()
         self.secretwallgroup = pygame.sprite.Group()
         self.secretcoingroup = pygame.sprite.Group()
+        self.endanimationgroup = pygame.sprite.Group()
         
         VectorSprite.groups = self.allgroup
         Flytext.groups = self.allgroup, self.flytextgroup
@@ -896,7 +887,7 @@ class Viewer(object):
         Monster4.groups = self.allgroup, self.tilegroup, self.monstergroup
         SecretWall.groups = self.allgroup, self.tilegroup, self.secretwallgroup, self.nogogroup, self.digablegroup
         SecretCoin.groups = self.allgroup, self.tilegroup, self.secretcoingroup, self.coingroup
-
+        Endanimation.groups = self.allgroup, self.endanimationgroup
         self.player = Player(pos = pygame.math.Vector2(100,-100))
         #Flytext(Viewer.width/2, Viewer.height/2,  "@", color=(255,0,0), duration = 3, fontsize=20)
 
@@ -1086,6 +1077,8 @@ class Viewer(object):
     def run(self):
         """The mainloop"""
         running = True
+        leftcorner = pygame.math.Vector2(0,self.height)
+        rightcorner = pygame.math.Vector2(self.width,self.height)
         pygame.mouse.set_visible(False)
         oldleft, oldmiddle, oldright  = False, False, False
         self.snipertarget = None
@@ -1528,16 +1521,27 @@ class Viewer(object):
                                 if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
                                     self.onbuyitem = True
                             self.newturn()
-
+                    
+                    if event.key == pygame.K_k:
+                        self.level = 13
+                    
                     if event.key == pygame.K_LESS:
                         for s in self.stairgroup:
                             if s.pos.x == self.player.pos.x and s.pos.y == self.player.pos.y:
                                 #Viewer.numbers = {}
                                 #---- GOINg down the stairs ------
                                 self.level += 1
-                                if self.level == 14:
-                                    Flytext(500,500,"You escaped from the dungeon of math", color=(0, 255, 0))
-                                    running = False
+                                if self.level >= 14:
+                                    pos = pygame.math.Vector2(1000, -800)
+                                    Endanimation(pos = pygame.math.Vector2(-Viewer.width *.25, -Viewer.height//2),
+                                                 move = pygame.math.Vector2(100,0))
+                                    Endanimation(pos = pygame.math.Vector2(Viewer.width * 1.25, -Viewer.height//2),
+                                                 move = pygame.math.Vector2(-100,0))
+                                    #Flytext(500,500,"You escaped from the dungeon of math", color=(255, 0, 0))
+                                    Rocket()
+                                    Rocket()
+                                    Rocket()
+                                    Rocket()
                                 for tile in self.tilegroup:
                                     tile.kill()
                                 self.player.endurance = self.player.max_endurance
