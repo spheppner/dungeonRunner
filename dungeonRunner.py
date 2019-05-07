@@ -655,7 +655,7 @@ class Endanimation(VectorSprite):
 class Rocket(VectorSprite):
     
     def _overwrite_parameters(self):
-        self._layer = 1000
+        self._layer = 10000000000000000000
         # start?
         self.move = pygame.math.Vector2(Viewer.width // 2, Viewer.height // 2)
         self.move.normalize_ip()
@@ -714,6 +714,7 @@ class Viewer(object):
         self.showing = False
         self.y = 475
         self.y2 = 500
+        dungeonGenerator.start()
         # ------ background images ------
         self.backgroundfilenames = [] # every .jpg file in folder 'data'
         try:
@@ -1538,10 +1539,14 @@ class Viewer(object):
                                     Endanimation(pos = pygame.math.Vector2(Viewer.width * 1.25, -Viewer.height//2),
                                                  move = pygame.math.Vector2(-100,0))
                                     #Flytext(500,500,"You escaped from the dungeon of math", color=(255, 0, 0))
-                                    Rocket()
-                                    Rocket()
-                                    Rocket()
-                                    Rocket()
+                                    #Rocket()
+                                    #Rocket()
+                                    #Rocket()
+                                    #Rocket()
+                                    for tile in self.tilegroup:
+                                        tile.kill()
+                                    dungeonGenerator.start()
+                                    break
                                 for tile in self.tilegroup:
                                     tile.kill()
                                 self.player.endurance = self.player.max_endurance
