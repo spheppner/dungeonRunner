@@ -628,10 +628,15 @@ class Spark(VectorSprite):
         self.move += self.gravity
 
 class Endanimation(VectorSprite):
+    
     def _overwrite_parameters(self):
         self._layer = 50000
         #self.max_distance = Viewer.width//2
         self.enough = False
+        #self.shakerscreen = None
+        #self.screen = None
+        #self.offset = None
+
 
     def create_image(self):
         self.image = pygame.Surface((Viewer.width//2, Viewer.height))
@@ -649,6 +654,7 @@ class Endanimation(VectorSprite):
                 self.enough = True
                 for _ in range(22):
                     Explosion(pos=pygame.math.Vector2(Viewer.width//2, -random.randint(0, Viewer.height)))
+                    Viewer.shakescreen = True        
             
             
         
@@ -692,6 +698,7 @@ class Viewer(object):
     height = 0
     menuitems = ["play", "credits", "quit"]
     cursorindex = 0
+    shakescreen = False
 
     def __init__(self, width=640, height=400, fps=30):
         """Initialize pygame, window, background, font,...
@@ -1659,7 +1666,21 @@ class Viewer(object):
 
             # ----------- clear, draw , update, flip -----------------
             self.allgroup.draw(self.screen)
-
+            
+            if Viewer.shakescreen:
+                gameOver = True
+                print("exittime", exittime) 
+                if exittime == 0:
+                    exittime = self.playtime + 1.1
+                #if random.random < 0.1:
+                #    Viewer.shakescreen = True
+                #else:
+                #    Viewer.shakescreen = False
+                self.shakerscreen = self.screen.copy()
+                self.screen.blit(self.shakerscreen, random.choice(((1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10))))
+                
+            
+            
             # -------- next frame -------------
             pygame.display.flip()
         #-----------------------------------------------------
