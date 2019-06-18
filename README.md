@@ -23,8 +23,10 @@ Rumors say that in the dungeon on the 15th level you will be teleported out to f
 ###### "LShift" + "W", "A", "S" or "D": digging mode (you dig in the direction that you pressed LShift with)
 
 ## Fight between Monster and Player
-Option 1: If the monster attacks the player, the player can flee
-Option 2: If the player engages the fight, he must end the fight or die in it, but he can't flee
+###### Option 1: 
+If the monster attacks the player, the player can flee
+###### Option 2: 
+If the player engages the fight, he must end the fight or die in it, but he can't flee
 If fight is engaged player needs to enter the answer to a multiplication that is randomly generated and shown in the lower left corner. Player has ten seconds to answer
 Damage that is dealen = left time * multiplicant variable that is defined in class of Player()
 
