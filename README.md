@@ -1,6 +1,6 @@
 # dungeonRunner
 A 2D rogue-like dungeon game with a random generated dungeon.
-Video of gameplay: https://www.youtube.com/watch?v=9r1kl7rWhjo
+Video of gameplay: <a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/watch?v=9r1kl7rWhjo">youtube</a>
 
 ![image](https://github.com/spheppner/dungeonRunner/blob/master/screenshot4.png)
 
