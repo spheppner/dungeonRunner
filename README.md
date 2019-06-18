@@ -1,13 +1,13 @@
 # dungeonRunner
 A 2D rogue-like dungeon game with a random generated dungeon.
-Video of gameplay: <a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/watch?v=9r1kl7rWhjo">youtube</a>
+Video of gameplay: [go](https://www.youtube.com/watch?v=9r1kl7rWhjo){:target="_blank"}
 
 ![image](https://github.com/spheppner/dungeonRunner/blob/master/screenshot4.png)
 
 ## Dungeon of Math
 Rumors say that in the dungeon on the 15th level you will be teleported out to freedom. So thats your goal. On your way out you need to fight against monsters and collect coins to heal yourself if you've been injured. Good Luck!
 
-## Legend
+## Legend{:target="_blank"}
 ###### "@": that is the player
 ###### "<": a stair leading down into the next level (next dungeon)
 ###### "1, 2, 3, 4": Monsters, the higher the number of it, the stronger it is"#": Wall, you can't go against it, except you dig it (digging mode, see "#Control")
