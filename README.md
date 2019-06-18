@@ -7,11 +7,11 @@ A 2D rogue-like dungeon game with a random generated dungeon.
 The goal of the game is to survive until the 15th dungeon.
 
 ## Legend
-"@": that is the player\n
+"@": that is the player
 "<": a stair leading down into the next level (next dungeon)
-"1, 2, 3, 4": Monsters, the higher the number of it, the stronger it is
-"#": Wall, you can't go against it, except you dig it (digging mode, explanation following)
-"0": Coin, you can collect it (you can't use it yet, explanation following)
+"1, 2, 3, 4": Monsters, the higher the number of it, the stronger it is"#": Wall, you can't go against it, except you dig it (digging mode, see "#Control")
+"#": Wall, you can't go against it, except you dig it (digging mode, see "#Control")
+"0": Coin, you can collect it (you can't use it yet, explanation following
 "+": shop, but you can't buy anything yet
 "-": exit sign
 
