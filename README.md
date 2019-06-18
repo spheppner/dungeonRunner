@@ -6,7 +6,7 @@ A 2D rogue-like dungeon game with a random generated dungeon. <a href = "https:/
 ## Dungeon of Math
 Rumors say that in the dungeon on the 15th level you will be teleported out to freedom. So thats your goal. On your way out you need to fight against monsters and collect coins to heal yourself if you've been injured. Good Luck!
 
-## Legend{:target="_blank"}
+## Legend
 ###### "@": that is the player
 ###### "<": a stair leading down into the next level (next dungeon)
 ###### "1, 2, 3, 4": Monsters, the higher the number of it, the stronger it is"#": Wall, you can't go against it, except you dig it (digging mode, see "#Control")
