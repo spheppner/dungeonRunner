@@ -721,6 +721,11 @@ class Viewer(object):
         self.showing = False
         self.y = 475
         self.y2 = 500
+        self.dig_sound = pygame.mixer.Sound("dig.wav")
+        self.hit_sound = pygame.mixer.Sound("Hit_Hurt.wav")
+        self.walk_sound = pygame.mixer.Sound("walk.wav")
+        self.pickup_sound = pygame.mixer.Sound("Pickup_Coin.wav")
+        self.new_level_sound = pygame.mixer.Sound("new_level.wav")
         dungeonGenerator.start()
         # ------ background images ------
         self.backgroundfilenames = [] # every .jpg file in folder 'data'
@@ -1120,154 +1125,427 @@ class Viewer(object):
                     dx = 0
                     dy = 0
                     
-                    
                     if event.key == pygame.K_RIGHT:
                         dx = 20
                         
-                    if event.key == pygame.K_LEFT:
-                        dx = -20
-                        
-                    if event.key == pygame.K_UP:
-                        dy = 20
-                    
-                    if event.key == pygame.K_DOWN:
-                        dy = -20
-                    
-                    x = self.player.pos.x + dx
-                    y = self.player.pos.y + dy
-                    
-                    for c in self.coingroup:
-                        if c.pos.x == x and c.pos.y == y:
-                            self.player.coins += 1
-                            Explosion(pos=pygame.math.Vector2(c.pos.x, c.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (255, 255, 0))
-                            c.kill()
-                            break
-                    
-                    for s in self.shopgroup:
-                        if s.pos.x == x and s.pos.y == y:
-                            self.onshop = True
-                        else:
-                            self.onshop = False
-                    for e in self.exitchargroup:
-                        if e.pos.x == x and e.pos.y == y:
-                            self.onexitchar = True
-                        else:
-                            self.onexitchar = False
-                    for b in self.buyablegroup:
-                        if b.pos.x == x and b.pos.y == y:
-                            self.onbuyitem = True
-                        elif self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
-                            self.onbuyitem = True
-                    
-                    if pressed_keys[pygame.K_LSHIFT]:
-                        for d in self.digablegroup:
-                            for v in self.secretwallgroup:
-                                if v.pos.x == x and v.pos.y == y:
-                                    for s in self.secretcoingroup:
-                                        if random.random() < 0.1:
-                                            Monster4(pos=s.pos)
-                                        else:
-                                            Coin(pos=s.pos)
-                                        for v in self.secretwallgroup:
-                                            if v.pos.x == x and v.pos.y == y:
-                                                v.kill()
+                        x = self.player.pos.x + 20
+                        y = self.player.pos.y + 0
+                        for c in self.coingroup:
+                            if c.pos.x == x and c.pos.y == y:
+                                self.player.coins += 1
+                                Explosion(pos=pygame.math.Vector2(c.pos.x, c.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (255, 255, 0))
+                                c.kill()
+                                self.pickup_sound.play()
+                                break
+                        for s in self.shopgroup:
+                            if s.pos.x == x and s.pos.y == y:
+                                self.onshop = True
+                            else:
+                                self.onshop = False
+                        for e in self.exitchargroup:
+                            if e.pos.x == x and e.pos.y == y:
+                                self.onexitchar = True
+                            else:
+                                self.onexitchar = False
+                        for b in self.buyablegroup:
+                            if b.pos.x == x and b.pos.y == y:
+                                self.onbuyitem = True
+                            elif self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
+                                self.onbuyitem = True
+                                
+                        if pressed_keys[pygame.K_LSHIFT]:
+                            for d in self.digablegroup:
+                                for v in self.secretwallgroup:
+                                    if v.pos.x == x and v.pos.y == y:
+                                        for s in self.secretcoingroup:
+                                            if random.random() < 0.1:
+                                                Monster4(pos=s.pos)
                                             else:
-                                                Srock(pos=v.pos)
-                                                v.kill()
-                                        s.kill()
-                                        #self.digging_mode = True
-                            if d.pos.x == x and d.pos.y == y:
-                                if self.player.endurance > 0:
-                                    #print("buddle nach rechts")
-                                    Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
-                                    d.kill()
-                                    if self.shopActive is False:
-                                        self.player.endurance -= 1
-                                    break
+                                                Coin(pos=s.pos)
+                                            for v in self.secretwallgroup:
+                                                if v.pos.x == x and v.pos.y == y:
+                                                    v.kill()
+                                                else:
+                                                    Srock(pos=v.pos)
+                                                    v.kill()
+                                            s.kill()
+                                if d.pos.x == x and d.pos.y == y:
+                                    if self.player.endurance > 0:
+                                        print("buddle nach rechts")
+                                        Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
+                                        d.kill()
+                                        self.dig_sound.play()
+                                        if self.shopActive is False:
+                                            self.player.endurance -= 1
+                                        break
+                                for s in self.shopgroup:
+                                    if s.pos.x != self.player.pos.x and s.pos.y != self.player.pos.y:
+                                        self.onshop = False
+                                for e in self.exitchargroup:
+                                    if e.pos.x != self.player.pos.x and e.pos.y != self.player.pos.y:
+                                        self.onexitchar = False
+                        # is da was?
+                        for w in self.nogogroup:
+                            if w.pos.x == x and w.pos.y == y:
+                                #Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 0.5, fontsize = 16)
+                                ex = w.pos.x-10
+                                ey = w.pos.y
+                                ep = pygame.math.Vector2(ex,ey)
+                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = 100, a2 = 260, color= (255, 0, 255))
+                                for s in self.shopgroup:
+                                    if s.pos.x == self.player.pos.x and s.pos.y == self.player.pos.y:
+                                        self.onshop = True
+                                for e in self.exitchargroup:
+                                    if e.pos.x == self.player.pos.x and e.pos.y == self.player.pos.y:
+                                        self.onexitchar = True
+                                for b in self.buyablegroup:
+                                    if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                        self.onbuyitem = True
+                                break
+                        else:
+                            # ------------ player wants to go to right ---
+                            #---battle? --
+                            for m in self.monstergroup:
+                                if self.player.pos == m.pos:
+                                    if self.showing != True:
+                                        dx, dy = 0, 0
+                                        # do not move into monster
+                                        result = self.battlerun(m)
+                                        if result == 0:
+                                            self.player.hitpoints -= m.damage
+                                        damage = result * self.player.multiplicant
+                                        m.hitpoints -= damage    
+                                        break                           
+                            # -------------
                             for s in self.shopgroup:
-                                if s.pos.x != self.player.pos.x and s.pos.y != self.player.pos.y:
+                                if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
                                     self.onshop = False
                             for e in self.exitchargroup:
-                                if e.pos.x != self.player.pos.x and e.pos.y != self.player.pos.y:
+                                if self.player.pos.x == e.pos.x and self.player.pos.y == e.pos.y:
                                     self.onexitchar = False
-                    
-                    # is da was?
-                    for w in self.nogogroup:
-                        if w.pos.x == x and w.pos.y == y:
-                            #Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 0.5, fontsize = 16)
-                            ex = w.pos.x-dx//2
-                            ey = w.pos.y-dy//2
-                            ep = pygame.math.Vector2(ex,ey)
-                            #if dx == 20 and dy == 0:
-                            if dx == 20:
-                                b1 = 100
-                                b2 = 260
-                            if dx == -20:
-                                b1 = 80
-                                b2 = -80
-                            if dy == -20:
-                                b1 = 10
-                                b2 = 170
-                            if dy == 20:
-                                b1 = -10
-                                b2 = -170
+                            for b in self.buyablegroup:
+                                if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                    self.onbuyitem = False
                                 
-                            
-                            Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = b1, a2 = b2, color= (255, 0, 255))
-                                #Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
-                            #elif dx == -20 and dy == 0:
-                            #    Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
-                            #elif dx == 0 and dy == 20:
-                            #    Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
-                            #elif dx == 0 and dy == -20:
-                            #    Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
-
-                            
-                            for s in self.shopgroup:
-                                if s.pos.x == self.player.pos.x and s.pos.y == self.player.pos.y:
-                                    self.onshop = True
-                            for e in self.exitchargroup:
-                                if e.pos.x == self.player.pos.x and e.pos.y == self.player.pos.y:
-                                    self.onexitchar = True
+                            self.player.pos += pygame.math.Vector2(dx,dy)
+                            self.walk_sound.play()
                             for b in self.buyablegroup:
                                 if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
                                     self.onbuyitem = True
-                            break
-                    else:
-                        # ------------ player wants to go to x+dx, y+dy ---
-                        #---battle? --
-                        for m in self.monstergroup:
-                            if self.player.pos == m.pos:
-                                if self.showing != True:
-                                    dx, dy = 0, 0
-                                    # do not move into monster
-                                    result = self.battlerun(m)
-                                    if result == 0:
-                                        self.player.hitpoints -= m.damage
-                                    damage = result * self.player.multiplicant
-                                    m.hitpoints -= damage    
-                                    break                           
-                        # -------------
-                        #for s in self.shopgroup:
-                        #    if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
-                        #        self.onshop = False
-                        #for e in self.exitchargroup:
-                        #    if self.player.pos.x == e.pos.x and self.player.pos.y == e.pos.y:
-                        #        self.onexitchar = False
-                        #for b in self.buyablegroup:
-                        #    if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
-                        #        self.onbuyitem = False
-                        # ---- bewegung    
-                        self.player.pos += pygame.math.Vector2(dx,dy)
+                            self.newturn()
+#----------------------------------------------------
+                    if event.key == pygame.K_LEFT:
+                        dx = -20
+                        x = self.player.pos.x - 20
+                        y = self.player.pos.y + 0
+                        for c in self.coingroup:
+                            if c.pos.x == x and c.pos.y == y:
+                                self.player.coins += 1
+                                Explosion(pos=pygame.math.Vector2(c.pos.x, c.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (255, 255, 0))
+                                c.kill()
+                                self.pickup_sound.play()
+                                break
+                        for s in self.shopgroup:
+                            if s.pos.x == x and s.pos.y == y:
+                                self.onshop = True
+                            else:
+                                self.onshop = False
+                        for e in self.exitchargroup:
+                            if e.pos.x == x and e.pos.y == y:
+                                self.onexitchar = True
+                            else:
+                                self.onexitchar = False
                         for b in self.buyablegroup:
-                            if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                            if b.pos.x == x and b.pos.y == y:
                                 self.onbuyitem = True
+                            elif self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
+                                self.onbuyitem = True
+                        if pressed_keys[pygame.K_LSHIFT]:
+                            for d in self.digablegroup:
+                                for v in self.secretwallgroup:
+                                    if v.pos.x == x and v.pos.y == y:
+                                        for s in self.secretcoingroup:
+                                            Coin(pos=s.pos)
+                                            for v in self.secretwallgroup:
+                                                if v.pos.x == x and v.pos.y == y:
+                                                    v.kill()
+                                                else:
+                                                    Srock(pos=v.pos)
+                                                    v.kill()
+                                            s.kill()
+                                if d.pos.x == x and d.pos.y == y:
+                                    if self.player.endurance > 0:
+                                        print("buddle nach links")
+                                        Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
+                                        d.kill()
+                                        self.dig_sound.play()
+                                        if self.shopActive is False:
+                                            self.player.endurance -= 1
+                                        break
+                                for s in self.shopgroup:
+                                    if s.pos.x != self.player.pos.x and s.pos.y != self.player.pos.y:
+                                        self.onshop = False
+                                for e in self.exitchargroup:
+                                    if e.pos.x != self.player.pos.x and e.pos.y != self.player.pos.y:
+                                        self.onexitchar = False
+                        # is da was?
+                        for w in self.nogogroup:
+                            if w.pos.x == x and w.pos.y == y:
+                                #Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 0.5, fontsize = 16)
+                                ex = w.pos.x+10
+                                ey = w.pos.y
+                                ep = pygame.math.Vector2(ex,ey)
+                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = 80, a2 = -80, color= (255, 0, 255))
+                                for s in self.shopgroup:
+                                    if s.pos.x == self.player.pos.x and s.pos.y == self.player.pos.y:
+                                        self.onshop = True
+                                for e in self.exitchargroup:
+                                    if e.pos.x == self.player.pos.x and e.pos.y == self.player.pos.y:
+                                        self.onexitchar = True
+                                for b in self.buyablegroup:
+                                    if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                        self.onbuyitem = True
+                                break
+                        else:
                             
-                        self.newturn()
-                    
-                    
-                    
-                    
+                            for m in self.monstergroup:
+                                if self.player.pos == m.pos:
+                                    if self.showing != True:
+                                        dx, dy = 0, 0
+                                        # do not move into monster
+                                        result = self.battlerun(m)
+                                        if result == 0:
+                                            self.player.hitpoints -= m.damage
+                                        damage = result * self.player.multiplicant
+                                        m.hitpoints -= damage    
+                                        break
+                            
+                            for s in self.shopgroup:
+                                if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
+                                    self.onshop = False
+                            for e in self.exitchargroup:
+                                if self.player.pos.x == e.pos.x and self.player.pos.y == e.pos.y:
+                                    self.onexitchar = False
+                            for b in self.buyablegroup:
+                                if self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
+                                    self.onbuyitem = False
+                                elif b.pos.x == x and b.pos.y == y:
+                                    self.onbuyitem = True
+                            self.player.pos += pygame.math.Vector2(dx,dy)
+                            self.walk_sound.play()
+                            for b in self.buyablegroup:
+                                if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                    self.onbuyitem = True
+                            self.newturn()
+                            
+                    if event.key == pygame.K_UP:
+                        dy = 20
+                        
+                        x = self.player.pos.x + 0
+                        y = self.player.pos.y + 20
+                        for c in self.coingroup:
+                            if c.pos.x == x and c.pos.y == y:
+                                self.player.coins += 1
+                                Explosion(pos=pygame.math.Vector2(c.pos.x, c.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (255, 255, 0))
+                                c.kill()
+                                self.pickup_sound.play()
+                                break
+                        for s in self.shopgroup:
+                            if s.pos.x == x and s.pos.y == y:
+                                self.onshop = True
+                            else:
+                                self.onshop = False
+                        for e in self.exitchargroup:
+                            if e.pos.x == x and e.pos.y == y:
+                                self.onexitchar = True
+                            else:
+                                self.onexitchar = False
+                        for b in self.buyablegroup:
+                            if b.pos.x == x and b.pos.y == y:
+                                self.onbuyitem = True
+                            elif self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
+                                self.onbuyitem = True
+                        if pressed_keys[pygame.K_LSHIFT]:
+                            for d in self.digablegroup:
+                                for v in self.secretwallgroup:
+                                    if v.pos.x == x and v.pos.y == y:
+                                        for s in self.secretcoingroup:
+                                            Coin(pos=s.pos)
+                                            for v in self.secretwallgroup:
+                                                if v.pos.x == x and v.pos.y == y:
+                                                    v.kill()
+                                                else:
+                                                    Srock(pos=v.pos)
+                                                    v.kill()
+                                            s.kill()
+                                if d.pos.x == x and d.pos.y == y:
+                                    if self.player.endurance > 0:
+                                        print("buddle nach oben")
+                                        Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
+                                        d.kill()
+                                        self.dig_sound.play()
+                                        if self.shopActive is False:
+                                            self.player.endurance -= 1
+                                        break
+                                for s in self.shopgroup:
+                                    if s.pos.x != self.player.pos.x and s.pos.y != self.player.pos.y:
+                                        self.onshop = False
+                                for e in self.exitchargroup:
+                                    if e.pos.x != self.player.pos.x and e.pos.y != self.player.pos.y:
+                                        self.onexitchar = False
+                        # is da was?
+                        for w in self.nogogroup:
+                            if w.pos.x == x and w.pos.y == y:
+                                #Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 0.5, fontsize = 16)
+                                ex = w.pos.x
+                                ey = w.pos.y-10
+                                ep = pygame.math.Vector2(ex,ey)
+                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = -10, a2 = -170, color= (255, 0, 255))
+                                for s in self.shopgroup:
+                                    if s.pos.x == self.player.pos.x and s.pos.y == self.player.pos.y:
+                                        self.onshop = True
+                                for e in self.exitchargroup:
+                                    if e.pos.x == self.player.pos.x and e.pos.y == self.player.pos.y:
+                                        self.onexitchar = True
+                                for b in self.buyablegroup:
+                                    if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                        self.onbuyitem = True
+                                break
+                        else:
+                            
+                            for m in self.monstergroup:
+                                if self.player.pos == m.pos:
+                                    if self.showing != True:
+                                        dx, dy = 0, 0
+                                        # do not move into monster
+                                        result = self.battlerun(m)
+                                        if result == 0:
+                                            self.player.hitpoints -= m.damage
+                                        damage = result * self.player.multiplicant
+                                        m.hitpoints -= damage    
+                                        break
+                            
+                            for s in self.shopgroup:
+                                if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
+                                    self.onshop = False
+                            for e in self.exitchargroup:
+                                if self.player.pos.x == e.pos.x and self.player.pos.y == e.pos.y:
+                                    self.onexitchar = False
+                            for b in self.buyablegroup:
+                                if self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
+                                    self.onbuyitem = False
+                                elif b.pos.x == x and b.pos.y == y:
+                                    self.onbuyitem = True
+                            self.player.pos += pygame.math.Vector2(dx,dy)
+                            self.walk_sound.play()
+                            for b in self.buyablegroup:
+                                if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                    self.onbuyitem = True
+                            self.newturn()
+                            
+                    if event.key == pygame.K_DOWN:
+                        dy = -20
+                        x = self.player.pos.x + 0
+                        y = self.player.pos.y - 20
+                        for c in self.coingroup:
+                            if c.pos.x == x and c.pos.y == y:
+                                self.player.coins += 1
+                                Explosion(pos=pygame.math.Vector2(c.pos.x, c.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (255, 255, 0))
+                                c.kill()
+                                self.pickup_sound.play()
+                                break
+                        for s in self.shopgroup:
+                            if s.pos.x == x and s.pos.y == y:
+                                self.onshop = True
+                            else:
+                                self.onshop = False
+                        for e in self.exitchargroup:
+                            if e.pos.x == x and e.pos.y == y:
+                                self.onexitchar = True
+                            else:
+                                self.onexitchar = False
+                        for b in self.buyablegroup:
+                            if b.pos.x == x and b.pos.y == y:
+                                self.onbuyitem = True
+                            elif self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
+                                self.onbuyitem = True
+                        if pressed_keys[pygame.K_LSHIFT]:
+                            for d in self.digablegroup:
+                                for v in self.secretwallgroup:
+                                    if v.pos.x == x and v.pos.y == y:
+                                        for s in self.secretcoingroup:
+                                            Coin(pos=s.pos)
+                                            for v in self.secretwallgroup:
+                                                if v.pos.x == x and v.pos.y == y:
+                                                    v.kill()
+                                                else:
+                                                    Srock(pos=v.pos)
+                                                    v.kill()
+                                            s.kill()
+                                if d.pos.x == x and d.pos.y == y:
+                                    if self.player.endurance > 0:
+                                        print("buddle nach unten")
+                                        Explosion(pos=pygame.math.Vector2(d.pos.x, d.pos.y), maxduration=0.5, gravityy=0, sparksmin= 10, color = (150, 0, 0))
+                                        d.kill()
+                                        self.dig_sound.play()
+                                        if self.shopActive is False:
+                                            self.player.endurance -= 1
+                                        break
+                                for s in self.shopgroup:
+                                    if s.pos.x != self.player.pos.x and s.pos.y != self.player.pos.y:
+                                        self.onshop = False
+                                for e in self.exitchargroup:
+                                    if e.pos.x != self.player.pos.x and e.pos.y != self.player.pos.y:
+                                        self.onexitchar = False
+                        # is da was?
+                        for w in self.nogogroup:
+                            if w.pos.x == x and w.pos.y == y:
+                                #Flytext(w.pos.x, -w.pos.y, "Ouch!", color = (255, 0, 0), duration = 0.5, fontsize = 16)
+                                ex = w.pos.x
+                                ey = w.pos.y+10
+                                ep = pygame.math.Vector2(ex,ey)
+                                Explosion(pos=ep, maxduration=0.5, gravityy=0, sparksmin= 10, a1 = 10, a2 = 170, color= (255, 0, 255))
+                                for s in self.shopgroup:
+                                    if s.pos.x == self.player.pos.x and s.pos.y == self.player.pos.y:
+                                        self.onshop = True
+                                for e in self.exitchargroup:
+                                    if e.pos.x == self.player.pos.x and e.pos.y == self.player.pos.y:
+                                        self.onexitchar = True
+                                for b in self.buyablegroup:
+                                    if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                        self.onbuyitem = True
+                                break
+                        else:
+                            
+                            for m in self.monstergroup:
+                                if self.player.pos == m.pos:
+                                    if self.showing != True:
+                                        dx, dy = 0, 0
+                                        # do not move into monster
+                                        result = self.battlerun(m)
+                                        if result == 0:
+                                            self.player.hitpoints -= m.damage
+                                        damage = result * self.player.multiplicant
+                                        m.hitpoints -= damage    
+                                        break
+                            
+                            for s in self.shopgroup:
+                                if self.player.pos.x == s.pos.x and self.player.pos.y == s.pos.y:
+                                    self.onshop = False
+                            for e in self.exitchargroup:
+                                if self.player.pos.x == e.pos.x and self.player.pos.y == e.pos.y:
+                                    self.onexitchar = False
+                            for b in self.buyablegroup:
+                                if self.player.pos.x == b.pos.x and self.player.pos.y == b.pos.y:
+                                    self.onbuyitem = False
+                                elif b.pos.x == x and b.pos.y == y:
+                                    self.onbuyitem = True
+                            self.player.pos += pygame.math.Vector2(dx,dy)
+                            self.walk_sound.play()
+                            for b in self.buyablegroup:
+                                if b.pos.x == self.player.pos.x and b.pos.y == self.player.pos.y:
+                                    self.onbuyitem = True
+                            self.newturn()
                     
                     if event.key == pygame.K_k:
                         self.level = 13
@@ -1278,6 +1556,7 @@ class Viewer(object):
                                 #Viewer.numbers = {}
                                 #---- GOINg down the stairs ------
                                 self.level += 1
+                                self.new_level_sound.play()
                                 if self.level >= 14:
                                     pos = pygame.math.Vector2(1000, -800)
                                     Endanimation(pos = pygame.math.Vector2(-Viewer.width *.25, -Viewer.height//2),
@@ -1301,7 +1580,6 @@ class Viewer(object):
                                     f.write("a\n")
                                 self.loadlevel()
                     if event.key == pygame.K_RETURN:
-                        print(self.onshop, self.shopActive)
                         if self.onshop is True and self.shopActive is False:
                             with open("shop_pos.txt", "w") as f:
                                 for s in self.shopgroup:
@@ -1324,11 +1602,14 @@ class Viewer(object):
                                         if self.player.coins >= b.item_price:
                                             if b.item_name == "Damage Upgrade":
                                                 self.player.multiplicant += 1.5
+                                                self.pickup_sound.play()
                                             elif b.item_name == "HP Upgrade":
                                                 self.player.max_hitpoints += 20
                                                 self.player.hitpoints += 10
+                                                self.pickup_sound.play()
                                             elif b.item_name == "Healing":
                                                 self.player.hitpoints += 20
+                                                self.pickup_sound.play()
                                             self.player.coins -= b.item_price
                                             self.player.inventory.append(b.item_name)
                                             b.kill()
@@ -1455,10 +1736,13 @@ class Viewer(object):
                         bonustime = self.battlerun(m)
                         if bonustime == 0:
                             self.player.hitpoints -= m.damage
+                            self.hit_sound.play()
                         damage = bonustime * self.player.multiplicant
                         m.hitpoints -= damage
+                        self.hit_sound.play()
                         if m.hitpoints <= 0:
                             self.player.coins += random.randint(1, 10)
+                            self.pickup_sound.play()
                         # TODO: Fight-System
                         return
                     
